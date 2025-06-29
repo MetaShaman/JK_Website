@@ -1071,12 +1071,30 @@ section {
         grid-template-columns: 1fr;
     }
 
-    .hero-content h1 {
-        font-size: 2.5rem;
+    .portfolio-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .portfolio-item {
+        margin-bottom: 1rem;
+    }
+    
+    .portfolio-image {
+        height: 150px;
+    }
+    
+    .portfolio-content {
+        padding: 1rem;
+    }
+    
+    .portfolio-details {
+        flex-direction: column;
+        gap: 0.5rem;
     }
 
     .section-title {
-        font-size: 2rem;
+        font-size: 1.75rem;
     }
 
     .page-header h1 {
@@ -1084,7 +1102,7 @@ section {
     }
 
     .cta-content h2 {
-        font-size: 2rem;
+        font-size: 1.75rem;
     }
 }
 
@@ -1094,32 +1112,39 @@ section {
     }
 
     .hero-content h1 {
-        font-size: 2rem;
+        font-size: 1.75rem;
     }
 
     .hero-buttons {
         flex-direction: column;
-        align-items: center;
+        gap: 1rem;
     }
 
     .btn {
         width: 100%;
-        max-width: 300px;
+        text-align: center;
     }
 
     .service-card,
     .feature,
-    .add-on-item,
-    .engagement-item {
-        padding: 1.5rem;
+    .portfolio-item {
+        padding: 1rem;
     }
 
     .contact-form {
-        padding: 1.5rem;
+        padding: 1rem;
     }
 
     .section-title {
-        font-size: 1.75rem;
+        font-size: 1.5rem;
+    }
+    
+    .portfolio-image {
+        height: 120px;
+    }
+    
+    .portfolio-image .image-placeholder i {
+        font-size: 2rem;
     }
 }
 
@@ -1176,5 +1201,156 @@ a:focus {
     .section-title {
         font-size: 18pt;
     }
+}
+
+/* Portfolio Section */
+.portfolio {
+    padding: 80px 0;
+    background-color: var(--background-light);
+}
+
+.portfolio .section-subtitle {
+    text-align: center;
+    margin-bottom: 3rem;
+    color: var(--text-light);
+    font-size: 1.1rem;
+}
+
+.portfolio-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.portfolio-item {
+    background: var(--white);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+}
+
+.portfolio-item:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-hover);
+}
+
+.portfolio-image {
+    height: 200px;
+    background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-color) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.portfolio-image .image-placeholder {
+    color: var(--white);
+    text-align: center;
+}
+
+.portfolio-image .image-placeholder i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.8;
+}
+
+.portfolio-content {
+    padding: 1.5rem;
+}
+
+.portfolio-content h3 {
+    color: var(--text-dark);
+    margin-bottom: 0.5rem;
+    font-size: 1.3rem;
+}
+
+.portfolio-category {
+    color: var(--primary-color);
+    font-weight: 500;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 1rem;
+}
+
+.portfolio-content p {
+    color: var(--text-light);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.portfolio-details {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.portfolio-details .detail {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-light);
+}
+
+.portfolio-details .detail i {
+    color: var(--primary-color);
+    font-size: 0.8rem;
+}
+
+.portfolio-cta {
+    text-align: center;
+}
+
+/* Checkbox Styles for Contact Form */
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    font-size: 0.95rem;
+    color: var(--text-dark);
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary-color);
+}
+
+/* Form Loading State */
+.btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* Success/Error Message Styles */
+.form-message {
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    text-align: center;
+    font-weight: 500;
+}
+
+.form-message.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.form-message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
 }
 

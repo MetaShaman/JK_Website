@@ -81,11 +81,19 @@ function updateActiveNavLink() {
 
 window.addEventListener('scroll', updateActiveNavLink);
 
-// Form Handling
+// Form Handling with Formspree Backend
 const contactForm = document.getElementById('contactForm');
 if (contactForm) {
     contactForm.addEventListener('submit', function(e) {
         e.preventDefault();
+        
+        // Track form submission in analytics
+        if (typeof gtag !== 'undefined') {
+            gtag('event', 'form_submit', {
+                'event_category': 'Contact',
+                'event_label': 'Contact Form'
+            });
+        }
         
         // Get form data
         const formData = new FormData(contactForm);
@@ -134,11 +142,53 @@ if (contactForm) {
             return;
         }
 
-        // Show success message (in a real implementation, you'd send this to a server)
-        showFormSuccess();
-        
-        // Reset form
-        contactForm.reset();
+        // Show loading state
+        const submitButton = contactForm.querySelector('button[type="submit"]');
+        const originalText = submitButton.textContent;
+        submitButton.textContent = 'Sending...';
+        submitButton.disabled = true;
+
+        // Submit to Formspree
+        fetch(contactForm.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                showFormSuccess();
+                contactForm.reset();
+                
+                // Track successful submission
+                if (typeof gtag !== 'undefined') {
+                    gtag('event', 'form_success', {
+                        'event_category': 'Contact',
+                        'event_label': 'Contact Form Success'
+                    });
+                }
+            } else {
+                throw new Error('Network response was not ok');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showFormError();
+            
+            // Track form error
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'form_error', {
+                    'event_category': 'Contact',
+                    'event_label': 'Contact Form Error'
+                });
+            }
+        })
+        .finally(() => {
+            // Reset button state
+            submitButton.textContent = originalText;
+            submitButton.disabled = false;
+        });
     });
 }
 
@@ -173,6 +223,89 @@ function showFormSuccess() {
         }, 5000);
     }
 }
+
+function showFormError() {
+    // Create error message
+    const errorMessage = document.createElement('div');
+    errorMessage.innerHTML = `
+        <div style="
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 6px;
+            border: 1px solid #f5c6cb;
+            margin-bottom: 1rem;
+            text-align: center;
+        ">
+            <strong>Oops!</strong> There was an error sending your message. Please try again or contact me directly.
+        </div>
+    `;
+    
+    // Insert error message before the form
+    const form = document.getElementById('contactForm');
+    if (form) {
+        form.parentNode.insertBefore(errorMessage.firstElementChild, form);
+        
+        // Remove error message after 5 seconds
+        setTimeout(() => {
+            const message = form.parentNode.querySelector('[style*="background-color: #f8d7da"]');
+            if (message) {
+                message.remove();
+            }
+        }, 5000);
+    }
+}
+
+// Analytics Tracking for Page Views
+document.addEventListener('DOMContentLoaded', function() {
+    // Track page view
+    if (typeof gtag !== 'undefined') {
+        gtag('event', 'page_view', {
+            'page_title': document.title,
+            'page_location': window.location.href
+        });
+    }
+    
+    // Track navigation clicks
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(link => {
+        link.addEventListener('click', function() {
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'navigation_click', {
+                    'event_category': 'Navigation',
+                    'event_label': this.textContent.trim()
+                });
+            }
+        });
+    });
+    
+    // Track CTA button clicks
+    const ctaButtons = document.querySelectorAll('.btn-primary');
+    ctaButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'cta_click', {
+                    'event_category': 'CTA',
+                    'event_label': this.textContent.trim()
+                });
+            }
+        });
+    });
+    
+    // Track service card interactions
+    const serviceCards = document.querySelectorAll('.service-card');
+    serviceCards.forEach(card => {
+        card.addEventListener('click', function() {
+            if (typeof gtag !== 'undefined') {
+                const serviceName = this.querySelector('h3').textContent;
+                gtag('event', 'service_card_click', {
+                    'event_category': 'Services',
+                    'event_label': serviceName
+                });
+            }
+        });
+    });
+});
 
 // Intersection Observer for Animations
 const observerOptions = {

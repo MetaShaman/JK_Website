@@ -3,11 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact - Joon Kim Property Stewardship</title>
-    <meta name="description" content="Get in touch with Joon Kim to discuss your property stewardship and project management needs. Schedule a complimentary consultation.">
+    <title>Contact - Joon Kim Land Stewardship</title>
+    <meta name="description" content="Get in touch with Joon Kim to discuss your land stewardship and project management needs. Schedule a complimentary consultation.">
     <link rel="stylesheet" href="css/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'GA_MEASUREMENT_ID');
+    </script>
 </head>
 <body>
     <!-- Navigation -->
@@ -42,7 +51,7 @@
     <section class="page-header">
         <div class="container">
             <h1>Let's Connect</h1>
-            <p>I'm eager to learn about your property and discuss how my services can help you achieve your goals. Please feel free to reach out using the contact information below, or fill out the form to schedule a complimentary consultation.</p>
+            <p>I'm eager to learn about your land and discuss how my services can help you achieve your goals. Please feel free to reach out using the contact information below, or fill out the form to schedule a complimentary consultation.</p>
         </div>
     </section>
 
@@ -59,16 +68,7 @@
                         </div>
                         <div class="contact-details">
                             <h3>Email</h3>
-                            <p>your.email@example.com</p>
-                        </div>
-                    </div>
-                    <div class="contact-item">
-                        <div class="contact-icon">
-                            <i class="fas fa-phone"></i>
-                        </div>
-                        <div class="contact-details">
-                            <h3>Phone</h3>
-                            <p>(XXX) XXX-XXXX</p>
+                            <p>ivanjoonkim@gmail.com</p>
                         </div>
                     </div>
                     <div class="contact-item">
@@ -77,14 +77,14 @@
                         </div>
                         <div class="contact-details">
                             <h3>Location</h3>
-                            <p>San Rafael, CA<br>Serving Northern California</p>
+                            <p>315 Margarita Dr.<br>San Rafael, CA 94901</p>
                         </div>
                     </div>
                     
                     <!-- Service Areas -->
                     <div class="service-areas">
                         <h3>Service Areas</h3>
-                        <p>I primarily serve properties in Northern California, with extensive experience in:</p>
+                        <p>Based in San Rafael, I primarily serve properties in Northern California, with extensive experience in:</p>
                         <ul>
                             <li>Marin County</li>
                             <li>Sonoma County</li>
@@ -98,7 +98,7 @@
                 <!-- Contact Form -->
                 <div class="contact-form">
                     <h2>Send Me a Message</h2>
-                    <form id="contactForm" action="#" method="POST">
+                    <form id="contactForm" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
                         <div class="form-group">
                             <label for="name">Name *</label>
                             <input type="text" id="name" name="name" required>
@@ -112,13 +112,13 @@
                             <input type="tel" id="phone" name="phone">
                         </div>
                         <div class="form-group">
-                            <label for="property-location">Property Location</label>
+                            <label for="property-location">Land Location</label>
                             <input type="text" id="property-location" name="property-location" placeholder="City, State">
                         </div>
                         <div class="form-group">
-                            <label for="property-size">Property Size</label>
+                            <label for="property-size">Land Size</label>
                             <select id="property-size" name="property-size">
-                                <option value="">Select property size</option>
+                                <option value="">Select land size</option>
                                 <option value="under-1-acre">Under 1 acre</option>
                                 <option value="1-5-acres">1-5 acres</option>
                                 <option value="5-10-acres">5-10 acres</option>
@@ -168,7 +168,7 @@
                         </div>
                         <div class="form-group">
                             <label for="message">Message *</label>
-                            <textarea id="message" name="message" rows="5" placeholder="Please describe your property, current challenges, and how I can help you achieve your goals." required></textarea>
+                            <textarea id="message" name="message" rows="5" placeholder="Please describe your land, current challenges, and how I can help you achieve your goals." required></textarea>
                         </div>
                         <button type="submit" class="btn btn-primary">Send Message</button>
                     </form>
@@ -182,7 +182,7 @@
         <div class="container">
             <div class="cta-content">
                 <h2>Schedule a Complimentary Consultation</h2>
-                <p>Ready to discuss your property's unique needs? I offer a free initial consultation to understand your goals and explore how my services can benefit your estate.</p>
+                <p>Ready to discuss your land's unique needs? I offer a free initial consultation to understand your goals and explore how my services can benefit your estate.</p>
                 <div class="consultation-benefits">
                     <div class="benefit">
                         <i class="fas fa-eye"></i>
@@ -211,7 +211,7 @@
             <div class="footer-content">
                 <div class="footer-section">
                     <h3>Joon Kim</h3>
-                    <p>Property Stewardship & Project Management</p>
+                    <p>Land Stewardship & Project Management</p>
                     <p>San Rafael, CA</p>
                 </div>
                 <div class="footer-section">
@@ -225,8 +225,8 @@
                 </div>
                 <div class="footer-section">
                     <h4>Contact</h4>
-                    <p><i class="fas fa-envelope"></i> your.email@example.com</p>
-                    <p><i class="fas fa-phone"></i> (XXX) XXX-XXXX</p>
+                    <p><i class="fas fa-envelope"></i> ivanjoonkim@gmail.com</p>
+                    <p><i class="fas fa-map-marker-alt"></i> 315 Margarita Dr., San Rafael, CA 94901</p>
                 </div>
             </div>
             <div class="footer-bottom">
