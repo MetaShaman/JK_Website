@@ -192,71 +192,27 @@
                                 <option value="Evening (5 PM - 8 PM)">Evening (5 PM - 8 PM)</option>
                             </select>
                         </div>
+                        
+                        <!-- Consultation Scheduling Section -->
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="schedule-consultation" name="scheduleConsultation">
+                                <span class="checkmark"></span>
+                                I'd like to schedule a consultation call
+                            </label>
+                        </div>
+                        
+                        <!-- Calendly Widget Container (hidden by default) -->
+                        <div id="calendly-container" class="calendly-container" style="display: none;">
+                            <h3>Schedule Your Consultation</h3>
+                            <p>Choose a time that works best for you. This will be a 30-minute complimentary consultation to discuss your land stewardship needs.</p>
+                            <div class="calendly-inline-widget" data-url="https://calendly.com/joonkim_schedule/consultation" style="min-width:320px;height:700px;"></div>
+                        </div>
+                        
                         <button type="submit" class="btn btn-primary">Send Message</button>
                     </form>
                     <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
                 </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Calendly Scheduling Section -->
-    <section class="calendly-section">
-        <div class="container">
-            <div class="calendly-content">
-                <h2>Schedule a Consultation</h2>
-                <p>Ready to discuss your land stewardship needs? Book a complimentary 30-minute consultation to explore how I can help you achieve your goals.</p>
-                <div class="calendly-embed">
-                    <!-- Calendly inline widget begin -->
-                    <div class="calendly-inline-widget" data-url="https://calendly.com/YOUR_CALENDLY_USERNAME/consultation" style="min-width:320px;height:700px;"></div>
-                    <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
-                    <!-- Calendly inline widget end -->
-                </div>
-                <div class="consultation-details">
-                    <div class="detail-item">
-                        <i class="fas fa-clock"></i>
-                        <h4>30-Minute Session</h4>
-                        <p>Comprehensive discussion of your land and goals</p>
-                    </div>
-                    <div class="detail-item">
-                        <i class="fas fa-video"></i>
-                        <h4>Video Call</h4>
-                        <p>Conducted via Zoom or Google Meet</p>
-                    </div>
-                    <div class="detail-item">
-                        <i class="fas fa-gift"></i>
-                        <h4>Complimentary</h4>
-                        <p>No cost for initial consultation</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Consultation CTA -->
-    <section class="consultation-cta">
-        <div class="container">
-            <div class="cta-content">
-                <h2>Schedule a Complimentary Consultation</h2>
-                <p>Ready to discuss your land's unique needs? I offer a free initial consultation to understand your goals and explore how my services can benefit your estate.</p>
-                <div class="consultation-benefits">
-                    <div class="benefit">
-                        <i class="fas fa-eye"></i>
-                        <h4>Property Assessment</h4>
-                        <p>Initial evaluation of your property's needs and opportunities</p>
-                    </div>
-                    <div class="benefit">
-                        <i class="fas fa-lightbulb"></i>
-                        <h4>Tailored Recommendations</h4>
-                        <p>Customized suggestions based on your specific goals and budget</p>
-                    </div>
-                    <div class="benefit">
-                        <i class="fas fa-handshake"></i>
-                        <h4>Partnership Discussion</h4>
-                        <p>Explore how we can work together for long-term success</p>
-                    </div>
-                </div>
-                <p class="consultation-note">Consultations can be conducted in person (for local properties) or via video call.</p>
             </div>
         </div>
     </section>
@@ -292,6 +248,28 @@
     </footer>
 
     <script src="js/script.js"></script>
+    
+    <!-- Calendly Integration -->
+    <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
+    <script>
+        // Toggle Calendly widget when checkbox is checked
+        document.addEventListener('DOMContentLoaded', function() {
+            const scheduleCheckbox = document.getElementById('schedule-consultation');
+            const calendlyContainer = document.getElementById('calendly-container');
+            
+            if (scheduleCheckbox && calendlyContainer) {
+                scheduleCheckbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        calendlyContainer.style.display = 'block';
+                        // Smooth scroll to the Calendly widget
+                        calendlyContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    } else {
+                        calendlyContainer.style.display = 'none';
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>
 
