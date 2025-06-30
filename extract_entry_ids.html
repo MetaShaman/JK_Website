@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extract Google Form Entry IDs</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .container { max-width: 800px; }
+        .step { margin-bottom: 30px; padding: 20px; border: 1px solid #ddd; border-radius: 4px; }
+        .code-block { background: #f8f9fa; padding: 15px; border-radius: 4px; font-family: monospace; white-space: pre-wrap; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        .result { margin-top: 10px; padding: 10px; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Extract Google Form Entry IDs</h1>
+        
+        <div class="step">
+            <h3>Step 1: Open Your Google Form</h3>
+            <p>Click the button below to open your Google Form in a new tab:</p>
+            <button onclick="openGoogleForm()">📋 Open Google Form</button>
+        </div>
+
+        <div class="step">
+            <h3>Step 2: Get the Form Source Code</h3>
+            <p>Once the form opens:</p>
+            <ol>
+                <li>Right-click anywhere on the form page</li>
+                <li>Select "View Page Source" (or press Ctrl+U / Cmd+U)</li>
+                <li>Copy the entire page source (Ctrl+A / Cmd+A, then Ctrl+C / Cmd+C)</li>
+            </ol>
+        </div>
+
+        <div class="step">
+            <h3>Step 3: Paste and Extract Entry IDs</h3>
+            <p>Paste the page source below and click "Extract Entry IDs":</p>
+            <textarea id="pageSource" rows="10" cols="80" placeholder="Paste the Google Form page source here..."></textarea>
+            <br><br>
+            <button onclick="extractEntryIds()">🔍 Extract Entry IDs</button>
+            <div id="extractionResult"></div>
+        </div>
+
+        <div class="step">
+            <h3>Step 4: Updated Form Fields</h3>
+            <p>Once you extract the entry IDs, here's how to update your form:</p>
+            <div class="code-block" id="updatedFormFields">
+// Paste the extracted entry IDs here to see the updated form fields
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openGoogleForm() {
+            window.open('https://docs.google.com/forms/d/e/1FAIpQLSf76wgQZ6fUxB7f2Zt1Ppjw1hlQcoKqmk4Yn0O2R5Qmy9UHJA/viewform', '_blank');
+        }
+
+        function extractEntryIds() {
+            const pageSource = document.getElementById('pageSource').value;
+            const resultDiv = document.getElementById('extractionResult');
+            
+            if (!pageSource.trim()) {
+                resultDiv.innerHTML = '<div class="info">Please paste the page source first.</div>';
+                return;
+            }
+
+            try {
+                // Extract entry IDs using regex
+                const entryIdRegex = /entry\.(\d+)/g;
+                const matches = pageSource.match(entryIdRegex);
+                
+                if (!matches || matches.length === 0) {
+                    resultDiv.innerHTML = '<div class="info">No entry IDs found in the page source. Make sure you copied the entire page source.</div>';
+                    return;
+                }
+
+                // Remove duplicates and sort
+                const uniqueEntryIds = [...new Set(matches)].sort();
+                
+                // Create a mapping of field names to entry IDs
+                const fieldMapping = {
+                    'Email': 'emailAddress', // This might not have an entry ID
+                    'Name': '',
+                    'Phone': '',
+                    'Land Love': '',
+                    'Property Location': '',
+                    'Property Size': '',
+                    'Services': '',
+                    'Timeline': '',
+                    'Message': '',
+                    'Contact Method': '',
+                    'Best Time': '',
+                    'Appointment Booked': '',
+                    'Appointment Type': '',
+                    'Appointment Date': '',
+                    'Appointment Time': '',
+                    'Appointment Info': ''
+                };
+
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <h4>✅ Found ${uniqueEntryIds.length} unique entry IDs:</h4>
+                        <ul>
+                            ${uniqueEntryIds.map(id => `<li><code>${id}</code></li>`).join('')}
+                        </ul>
+                        <p><strong>Next step:</strong> You'll need to manually map these entry IDs to your form fields by checking the form structure.</p>
+                    </div>
+                `;
+
+                // Generate updated form fields code
+                generateUpdatedFormFields(uniqueEntryIds);
+
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="info">Error extracting entry IDs: ${error.message}</div>`;
+            }
+        }
+
+        function generateUpdatedFormFields(entryIds) {
+            const codeBlock = document.getElementById('updatedFormFields');
+            
+            const formFieldsCode = `// Updated form fields with current entry IDs
+// You'll need to manually map these to your specific fields
+
+// Found entry IDs: ${entryIds.join(', ')}
+
+// Example mapping (you need to verify these):
+const fieldMapping = {
+    email: 'emailAddress', // This might not have an entry ID
+    name: '${entryIds[0] || 'entry.XXXXX'}',
+    phone: '${entryIds[1] || 'entry.XXXXX'}',
+    landLove: '${entryIds[2] || 'entry.XXXXX'}',
+    propertyLocation: '${entryIds[3] || 'entry.XXXXX'}',
+    propertySize: '${entryIds[4] || 'entry.XXXXX'}',
+    services: '${entryIds[5] || 'entry.XXXXX'}',
+    timeline: '${entryIds[6] || 'entry.XXXXX'}',
+    message: '${entryIds[7] || 'entry.XXXXX'}',
+    contactMethod: '${entryIds[8] || 'entry.XXXXX'}',
+    bestTime: '${entryIds[9] || 'entry.XXXXX'}',
+    appointmentBooked: '${entryIds[10] || 'entry.XXXXX'}',
+    appointmentType: '${entryIds[11] || 'entry.XXXXX'}',
+    appointmentDate: '${entryIds[12] || 'entry.XXXXX'}',
+    appointmentTime: '${entryIds[13] || 'entry.XXXXX'}',
+    appointmentInfo: '${entryIds[14] || 'entry.XXXXX'}'
+};
+
+// To verify the correct mapping:
+// 1. Open your Google Form
+// 2. Right-click on each field and "Inspect Element"
+// 3. Look for the "name" attribute with entry.XXXXX
+// 4. Map each field to the correct entry ID`;
+            
+            codeBlock.textContent = formFieldsCode;
+        }
+    </script>
+</body>
+</html> 
