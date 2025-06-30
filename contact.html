@@ -246,6 +246,9 @@
                         <input type="hidden" id="appointment-info" name="entry.1480507405" value="">
                         
                         <button type="submit" class="btn btn-primary">Send Message</button>
+                        
+                        <!-- Debug button for testing -->
+                        <button type="button" class="btn btn-secondary" style="margin-left: 10px; font-size: 12px;" onclick="simulateCallScheduled()">Test: Simulate Call Scheduled</button>
                     </form>
                 </div>
             </div>
@@ -377,15 +380,41 @@
             // Start trying to set up Calendly listener
             setupCalendlyListener();
             
+            // Function to simulate call scheduled for testing
+            window.simulateCallScheduled = function() {
+                console.log('🧪 Simulating call scheduled...');
+                callScheduledField.value = 'true';
+                document.getElementById('appointment-booked').value = 'Yes';
+                document.getElementById('appointment-type').value = 'Land Stewardship Discovery Call';
+                document.getElementById('appointment-date').value = 'Monday, January 15, 2024';
+                document.getElementById('appointment-time').value = '2:00 PM PST';
+                document.getElementById('appointment-info').value = 'Event: Land Stewardship Discovery Call | Duration: 15 minutes | Location: Video Call';
+                callScheduledStatus.style.display = 'block';
+                console.log('✅ Call scheduled simulation complete!');
+            };
+            
             // Form submission validation
             if (contactForm) {
                 contactForm.addEventListener('submit', function(e) {
+                    console.log('📝 Form submission started');
+                    
                     const selectedValue = document.querySelector('input[name="consultationType"]:checked')?.value;
                     const isSchedulingSelected = selectedValue === 'discovery_call';
                     const isCallScheduled = callScheduledField.value === 'true';
                     
+                    console.log('📊 Form state:', {
+                        selectedValue: selectedValue,
+                        isSchedulingSelected: isSchedulingSelected,
+                        isCallScheduled: isCallScheduled,
+                        callScheduledFieldValue: callScheduledField.value
+                    });
+                    
                     if (isSchedulingSelected && !isCallScheduled) {
+                        console.log('❌ Form submission blocked - call not scheduled');
                         e.preventDefault();
+                        e.stopPropagation();
+                        e.stopImmediatePropagation();
+                        
                         alert('⚠️ Please schedule your discovery call before submitting the form.\n\nYou selected to schedule a call, but no call has been scheduled yet. Please complete your booking in the calendar above, or change your preference to "Not ready to book a call now" if you prefer to communicate via email only.');
                         calendlyContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
                         return false;
@@ -398,9 +427,13 @@
                     }
                     
                     const shouldSubmit = confirm(confirmMessage);
+                    console.log('✅ User confirmed submission:', shouldSubmit);
                     
                     if (!shouldSubmit) {
+                        console.log('❌ User cancelled submission');
                         e.preventDefault();
+                        e.stopPropagation();
+                        e.stopImmediatePropagation();
                         return false;
                     }
                     
