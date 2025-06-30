@@ -246,6 +246,15 @@
                                     <span>✅ Discovery call scheduled successfully!</span>
                                 </div>
                             </div>
+                            <!-- Manual trigger for testing -->
+                            <div style="text-align: center; margin-top: 15px;">
+                                <button type="button" class="btn btn-info btn-sm" onclick="markCallAsScheduled({ source: 'manual test' })">
+                                    🔧 Test: Simulate Booking Detection
+                                </button>
+                                <small style="display: block; margin-top: 5px; color: #6c757d;">
+                                    Use this button to test if booking detection works
+                                </small>
+                            </div>
                         </div>
                         
                         <!-- Hidden field to track call scheduling -->
@@ -350,10 +359,13 @@
                                         if (mutation.type === 'childList') {
                                             mutation.addedNodes.forEach(function(node) {
                                                 if (node.nodeType === 1 && node.textContent) {
+                                                    console.log('🔍 DOM change detected:', node.textContent.substring(0, 100));
                                                     if (node.textContent.includes('confirmed') || 
                                                         node.textContent.includes('scheduled') || 
                                                         node.textContent.includes('booked') ||
-                                                        node.textContent.includes('success')) {
+                                                        node.textContent.includes('success') ||
+                                                        node.textContent.includes('thank you') ||
+                                                        node.textContent.includes('appointment')) {
                                                         console.log('🎯 Detected booking completion in DOM:', node.textContent);
                                                         markCallAsScheduled({ source: 'DOM detection' });
                                                     }
@@ -370,6 +382,35 @@
                                 });
                                 console.log('👁️ DOM observer set up for Calendly container');
                             }
+                            
+                            // Fallback: Check for booking completion every 3 seconds
+                            const bookingCheckInterval = setInterval(function() {
+                                const calendlyContainer = document.querySelector('.calendly-inline-widget');
+                                if (calendlyContainer) {
+                                    const allElements = calendlyContainer.querySelectorAll('*');
+                                    allElements.forEach(function(element) {
+                                        if (element.textContent && (
+                                            element.textContent.includes('confirmed') ||
+                                            element.textContent.includes('scheduled') ||
+                                            element.textContent.includes('booked') ||
+                                            element.textContent.includes('success') ||
+                                            element.textContent.includes('thank you') ||
+                                            element.textContent.includes('appointment') ||
+                                            element.textContent.includes('15 minutes')
+                                        )) {
+                                            console.log('🎯 Fallback detection: Found booking text:', element.textContent);
+                                            markCallAsScheduled({ source: 'fallback detection' });
+                                            clearInterval(bookingCheckInterval);
+                                        }
+                                    });
+                                }
+                            }, 3000);
+                            
+                            // Stop fallback checking after 10 minutes
+                            setTimeout(function() {
+                                clearInterval(bookingCheckInterval);
+                                console.log('⏰ Stopped fallback booking detection');
+                            }, 600000);
                         }
                     } catch (error) {
                         console.error('❌ Error setting up Calendly listener:', error);
