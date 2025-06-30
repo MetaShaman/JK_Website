@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimal Google Form Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .test-controls { margin-bottom: 30px; padding: 20px; background: #f8f9fa; border-radius: 4px; }
+        .test-controls button { margin-right: 10px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <h1>🔬 Minimal Google Form Test</h1>
+    
+    <div class="test-controls">
+        <h3>Test Controls:</h3>
+        <button onclick="populateTestData()">📝 Populate Test Data</button>
+        <button onclick="clearForm()">🗑️ Clear Form</button>
+        <button onclick="testDirectSubmit()">🚀 Test Direct Submit</button>
+        <button onclick="testIframeSubmit()">📨 Test Iframe Submit</button>
+    </div>
+
+    <form id="testForm" action="https://docs.google.com/forms/d/e/1FAIpQLSf76wgQZ6fUxB7f2Zt1Ppjw1hlQcoKqmk4Yn0O2R5Qmy9UHJA/formResponse" method="POST" target="hidden_iframe">
+        <div class="form-group">
+            <label for="email">Email Address *</label>
+            <input type="email" id="email" name="emailAddress" required>
+        </div>
+        <div class="form-group">
+            <label for="name">Full Name *</label>
+            <input type="text" id="name" name="entry.641543091" required>
+        </div>
+        <div class="form-group">
+            <label for="message">Message *</label>
+            <textarea id="message" name="entry.771214362" rows="3" required></textarea>
+        </div>
+        <button type="submit">Submit Test</button>
+    </form>
+
+    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;" onload="console.log('📨 Form submitted to Google Forms!')"></iframe>
+
+    <script>
+        function populateTestData() {
+            document.getElementById('email').value = 'test@example.com';
+            document.getElementById('name').value = 'Test User';
+            document.getElementById('message').value = 'This is a test message from minimal form - ' + new Date().toLocaleString();
+            console.log('✅ Test data populated');
+        }
+
+        function clearForm() {
+            document.getElementById('testForm').reset();
+            console.log('🗑️ Form cleared');
+        }
+
+        function testDirectSubmit() {
+            populateTestData();
+            console.log('🚀 Testing direct form submission...');
+            console.log('📊 Form action:', document.getElementById('testForm').action);
+            console.log('📊 Form method:', document.getElementById('testForm').method);
+            console.log('📊 Form target:', document.getElementById('testForm').target);
+            
+            // Submit directly without any JavaScript interference
+            document.getElementById('testForm').submit();
+        }
+
+        function testIframeSubmit() {
+            populateTestData();
+            console.log('📨 Testing iframe form submission...');
+            
+            // Submit with iframe target
+            document.getElementById('testForm').target = 'hidden_iframe';
+            document.getElementById('testForm').submit();
+            
+            // Reset target after submission
+            setTimeout(() => {
+                document.getElementById('testForm').target = 'hidden_iframe';
+            }, 1000);
+        }
+
+        // Auto-populate on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            populateTestData();
+            console.log('📝 Page loaded with test data');
+        });
+    </script>
+</body>
+</html> 

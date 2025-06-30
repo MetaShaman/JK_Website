@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Google Form URL</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .test-section { margin-bottom: 30px; padding: 20px; border: 1px solid #ddd; border-radius: 4px; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        .result { margin-top: 10px; padding: 10px; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Google Form URL Verification</h1>
+    
+    <div class="test-section">
+        <h3>Form URL Information:</h3>
+        <p><strong>Current Form URL:</strong> <code>https://docs.google.com/forms/d/e/1FAIpQLSf76wgQZ6fUxB7f2Zt1Ppjw1hlQcoKqmk4Yn0O2R5Qmy9UHJA/formResponse</code></p>
+        <p><strong>Form ID:</strong> <code>1FAIpQLSf76wgQZ6fUxB7f2Zt1Ppjw1hlQcoKqmk4Yn0O2R5Qmy9UHJA</code></p>
+        <button onclick="testFormAccess()">🔗 Test Form Access</button>
+        <button onclick="openFormInNewTab()">📋 Open Form in New Tab</button>
+        <div id="accessResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Field Names Test:</h3>
+        <p>Testing the field names we're using:</p>
+        <ul>
+            <li><code>emailAddress</code> - Email field</li>
+            <li><code>entry.641543091</code> - Name field</li>
+            <li><code>entry.771214362</code> - Message field</li>
+        </ul>
+        <button onclick="testFieldNames()">🧪 Test Field Names</button>
+        <div id="fieldResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Simple Form Test:</h3>
+        <form id="simpleForm" action="https://docs.google.com/forms/d/e/1FAIpQLSf76wgQZ6fUxB7f2Zt1Ppjw1hlQcoKqmk4Yn0O2R5Qmy9UHJA/formResponse" method="POST" target="_blank">
+            <p><label>Email: <input type="email" name="emailAddress" value="test@example.com" required></label></p>
+            <p><label>Name: <input type="text" name="entry.641543091" value="Test User" required></label></p>
+            <p><label>Message: <textarea name="entry.771214362" required>Test message from verification page</textarea></label></p>
+            <button type="submit">Submit to Google Forms</button>
+        </form>
+    </div>
+
+    <script>
+        function testFormAccess() {
+            const resultDiv = document.getElementById('accessResult');
+            resultDiv.innerHTML = '<div class="info">Testing form access...</div>';
+            
+            // Try to fetch the form page
+            fetch('https://docs.google.com/forms/d/e/1FAIpQLSf76wgQZ6fUxB7f2Zt1Ppjw1hlQcoKqmk4Yn0O2R5Qmy9UHJA/viewform')
+                .then(response => {
+                    if (response.ok) {
+                        resultDiv.innerHTML = '<div class="success">✅ Form URL is accessible! Status: ' + response.status + '</div>';
+                    } else {
+                        resultDiv.innerHTML = '<div class="error">❌ Form URL returned error: ' + response.status + '</div>';
+                    }
+                })
+                .catch(error => {
+                    resultDiv.innerHTML = '<div class="error">❌ Error accessing form: ' + error.message + '</div>';
+                });
+        }
+
+        function openFormInNewTab() {
+            window.open('https://docs.google.com/forms/d/e/1FAIpQLSf76wgQZ6fUxB7f2Zt1Ppjw1hlQcoKqmk4Yn0O2R5Qmy9UHJA/viewform', '_blank');
+        }
+
+        function testFieldNames() {
+            const resultDiv = document.getElementById('fieldResult');
+            resultDiv.innerHTML = '<div class="info">Testing field names...</div>';
+            
+            // Create a test form submission
+            const formData = new FormData();
+            formData.append('emailAddress', 'test@example.com');
+            formData.append('entry.641543091', 'Test User');
+            formData.append('entry.771214362', 'Test message');
+            
+            fetch('https://docs.google.com/forms/d/e/1FAIpQLSf76wgQZ6fUxB7f2Zt1Ppjw1hlQcoKqmk4Yn0O2R5Qmy9UHJA/formResponse', {
+                method: 'POST',
+                body: formData,
+                mode: 'no-cors' // Required for Google Forms
+            })
+            .then(() => {
+                resultDiv.innerHTML = '<div class="success">✅ Field names test completed (CORS prevents response checking)</div>';
+            })
+            .catch(error => {
+                resultDiv.innerHTML = '<div class="error">❌ Field names test failed: ' + error.message + '</div>';
+            });
+        }
+
+        // Auto-run tests on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔍 Verification page loaded');
+            setTimeout(testFormAccess, 1000);
+        });
+    </script>
+</body>
+</html> 
