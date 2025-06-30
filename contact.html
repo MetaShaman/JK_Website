@@ -471,7 +471,7 @@
                 console.log('- window.Calendly type:', typeof window.Calendly);
                 
                 // More robust check for Calendly readiness
-                if (window.Calendly && typeof window.Calendly === 'function' && window.Calendly.initInlineWidget) {
+                if (window.Calendly && typeof window.Calendly === 'function') {
                     console.log('✅ Calendly is ready, setting up listeners...');
                     // Wait a bit more for the widget to be fully initialized
                     setTimeout(function() {
@@ -501,22 +501,29 @@
                             try {
                                 // Listen for any Calendly events using a more generic approach
                                 if (window.Calendly && typeof window.Calendly === 'function') {
-                                    // Try to hook into the Calendly function itself
-                                    const originalCalendly = window.Calendly;
-                                    window.Calendly = function(eventType, callback) {
-                                        console.log('🎯 Calendly event listener registered:', eventType);
-                                        return originalCalendly.call(this, eventType, function(e) {
-                                            console.log('🎯 Calendly event fired:', eventType, e);
-                                            if (eventType === 'onEventScheduled' || eventType === 'onDateAndTimeSelected') {
-                                                markCallAsScheduled(e);
-                                            }
-                                            return callback(e);
+                                    console.log('✅ Calendly function is available for event monitoring');
+                                    
+                                    // Try to register additional event listeners
+                                    try {
+                                        window.Calendly('onEventScheduled', function(e) {
+                                            console.log('🎉 Additional onEventScheduled listener:', e);
+                                            markCallAsScheduled(e);
                                         });
-                                    };
-                                    console.log('✅ Calendly function hooked for event monitoring');
+                                    } catch (e) {
+                                        console.log('⚠️ Could not register additional onEventScheduled listener');
+                                    }
+                                    
+                                    try {
+                                        window.Calendly('onDateAndTimeSelected', function(e) {
+                                            console.log('📅 Additional onDateAndTimeSelected listener:', e);
+                                            markCallAsScheduled(e);
+                                        });
+                                    } catch (e) {
+                                        console.log('⚠️ Could not register additional onDateAndTimeSelected listener');
+                                    }
                                 }
                             } catch (error) {
-                                console.error('❌ Error hooking Calendly function:', error);
+                                console.error('❌ Error checking Calendly function:', error);
                             }
                             
                             // Listen for any Calendly events
