@@ -481,15 +481,9 @@
         // Start Calendly integration
         setupCalendlyIntegration();
         
-        // Debug: Check for any old function references
-        console.log('🔍 Debug: Checking for old function references...');
-        console.log('- setupCalendlyListener exists:', typeof setupCalendlyListener);
-        console.log('- initCalendlyListener exists:', typeof initCalendlyListener);
-        console.log('- checkCalendlyLoaded exists:', typeof checkCalendlyLoaded);
-        console.log('- Current file functions:', Object.keys(window).filter(key => key.includes('Calendly')));
-        
-        // Handle consultation preference radio buttons
+        // Form submission handling
         document.addEventListener('DOMContentLoaded', function() {
+            const contactForm = document.getElementById('contactForm');
             const discoveryCallRadio = document.querySelector('input[value="discovery_call"]');
             const emailOnlyRadio = document.querySelector('input[value="email_only"]');
             const calendlyContainer = document.getElementById('calendly-container');
@@ -516,7 +510,66 @@
             
             // Check initial state
             handleConsultationPreference();
+            
+            // Form submission blocking
+            if (contactForm) {
+                contactForm.addEventListener('submit', function(e) {
+                    const callScheduledField = document.getElementById('call-scheduled');
+                    const isCallScheduled = callScheduledField && callScheduledField.value === 'true';
+                    const isDiscoveryCallSelected = discoveryCallRadio && discoveryCallRadio.checked;
+                    
+                    console.log('📝 Form submission attempt:');
+                    console.log('- Discovery call selected:', isDiscoveryCallSelected);
+                    console.log('- Call scheduled:', isCallScheduled);
+                    
+                    if (isDiscoveryCallSelected && !isCallScheduled) {
+                        e.preventDefault();
+                        console.log('❌ Form submission blocked - call not scheduled');
+                        
+                        // Show blocking message
+                        const blockingMessage = document.createElement('div');
+                        blockingMessage.className = 'alert alert-warning';
+                        blockingMessage.style.cssText = `
+                            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+                            border: 2px solid #ffc107;
+                            border-radius: 10px;
+                            padding: 15px;
+                            margin: 15px 0;
+                            text-align: center;
+                        `;
+                        blockingMessage.innerHTML = `
+                            <strong style="color: #856404;">⚠️ Please Schedule Your Call First</strong><br>
+                            <small style="color: #856404;">You selected a discovery call but haven't scheduled it yet. Please complete your booking above before submitting the form.</small>
+                        `;
+                        
+                        // Insert message before the form
+                        contactForm.parentNode.insertBefore(blockingMessage, contactForm);
+                        
+                        // Scroll to the message
+                        blockingMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        
+                        // Remove message after 5 seconds
+                        setTimeout(function() {
+                            if (blockingMessage.parentNode) {
+                                blockingMessage.parentNode.removeChild(blockingMessage);
+                            }
+                        }, 5000);
+                        
+                        return false;
+                    } else {
+                        console.log('✅ Form submission allowed');
+                        return true;
+                    }
+                });
+            }
         });
+        
+        // Debug: Check for any old function references
+        console.log('🔍 Debug: Checking for old function references...');
+        console.log('- setupCalendlyListener exists:', typeof setupCalendlyListener);
+        console.log('- initCalendlyListener exists:', typeof initCalendlyListener);
+        console.log('- checkCalendlyLoaded exists:', typeof checkCalendlyLoaded);
+        console.log('- Current file functions:', Object.keys(window).filter(key => key.includes('Calendly')));
         
         // Test function for Calendly listener
         function testCalendlyListener() {
