@@ -192,21 +192,15 @@
                         <div class="form-group">
                             <label class="form-label-required">Consultation Preference *</label>
                             <div class="radio-group">
-                                <label class="radio-label">
-                                    <input type="radio" name="consultationPreference" value="schedule-call" id="schedule-call" required>
+                                <label class="radio-option">
+                                    <input type="radio" name="consultationType" value="discovery_call" required>
                                     <span class="radio-custom"></span>
-                                    <div class="radio-content">
-                                        <span class="radio-title">📅 Schedule a 15-Minute Discovery Call</span>
-                                        <span class="radio-description">I'd like to schedule a 15-minute complimentary discovery call to discuss my land stewardship needs (recommended for new clients)</span>
-                                    </div>
+                                    Schedule a 15 minute discovery call
                                 </label>
-                                <label class="radio-label">
-                                    <input type="radio" name="consultationPreference" value="not-ready" id="not-ready" required>
+                                <label class="radio-option">
+                                    <input type="radio" name="consultationType" value="email_only" required>
                                     <span class="radio-custom"></span>
-                                    <div class="radio-content">
-                                        <span class="radio-title">📧 Email Communication Only</span>
-                                        <span class="radio-description">I'm not ready to schedule a call today, but would like to receive information via email</span>
-                                    </div>
+                                    Not ready to book a call now
                                 </label>
                             </div>
                             <small class="form-help-text">💡 Discovery calls help us better understand your specific needs and provide tailored recommendations.</small>
@@ -295,8 +289,7 @@
     <script>
         // Toggle Calendly widget when radio button is selected
         document.addEventListener('DOMContentLoaded', function() {
-            const scheduleCallRadio = document.getElementById('schedule-call');
-            const notReadyRadio = document.getElementById('not-ready');
+            const consultationTypeRadios = document.querySelectorAll('input[name="consultationType"]');
             const calendlyContainer = document.getElementById('calendly-container');
             const contactForm = document.getElementById('contactForm');
             const callScheduledField = document.getElementById('call-scheduled');
@@ -304,7 +297,9 @@
             
             // Function to handle radio button changes
             function handleConsultationPreference() {
-                if (scheduleCallRadio && scheduleCallRadio.checked) {
+                const selectedValue = document.querySelector('input[name="consultationType"]:checked')?.value;
+                
+                if (selectedValue === 'discovery_call') {
                     calendlyContainer.style.display = 'block';
                     // Reset call scheduled status when switching to call option
                     callScheduledField.value = 'false';
@@ -319,12 +314,9 @@
             }
             
             // Add event listeners for radio buttons
-            if (scheduleCallRadio) {
-                scheduleCallRadio.addEventListener('change', handleConsultationPreference);
-            }
-            if (notReadyRadio) {
-                notReadyRadio.addEventListener('change', handleConsultationPreference);
-            }
+            consultationTypeRadios.forEach(radio => {
+                radio.addEventListener('change', handleConsultationPreference);
+            });
             
             // Listen for Calendly booking events
             if (window.Calendly) {
@@ -381,12 +373,13 @@
             // Form submission validation
             if (contactForm) {
                 contactForm.addEventListener('submit', function(e) {
-                    const isSchedulingSelected = scheduleCallRadio && scheduleCallRadio.checked;
+                    const selectedValue = document.querySelector('input[name="consultationType"]:checked')?.value;
+                    const isSchedulingSelected = selectedValue === 'discovery_call';
                     const isCallScheduled = callScheduledField.value === 'true';
                     
                     if (isSchedulingSelected && !isCallScheduled) {
                         e.preventDefault();
-                        alert('⚠️ Please schedule your discovery call before submitting the form.\n\nYou selected to schedule a call, but no call has been scheduled yet. Please complete your booking in the calendar above, then try submitting again.');
+                        alert('⚠️ Please schedule your discovery call before submitting the form.\n\nYou selected to schedule a call, but no call has been scheduled yet. Please complete your booking in the calendar above, or change your preference to "Not ready to book a call now" if you prefer to communicate via email only.');
                         calendlyContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
                         return false;
                     }
@@ -418,7 +411,8 @@
             // Function to show submission success
             function showSubmissionSuccess() {
                 const contactFormContainer = document.querySelector('.contact-form');
-                const isSchedulingSelected = scheduleCallRadio && scheduleCallRadio.checked;
+                const selectedValue = document.querySelector('input[name="consultationType"]:checked')?.value;
+                const isSchedulingSelected = selectedValue === 'discovery_call';
                 
                 let successMessage = `
                     <div class="submission-success">
