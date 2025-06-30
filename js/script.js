@@ -114,7 +114,7 @@ if (contactForm) {
         }
 
         // Basic form validation
-        const requiredFields = ['entry.YOUR_NAME_ENTRY_ID', 'entry.YOUR_EMAIL_ENTRY_ID', 'entry.YOUR_MESSAGE_ENTRY_ID']; // name, email, message
+        const requiredFields = ['entry.641543091', 'entry.771214362']; // full name, challenges
         let isValid = true;
         let errorMessage = '';
 
@@ -122,22 +122,13 @@ if (contactForm) {
             const input = contactForm.querySelector(`[name="${field}"]`);
             if (!formObject[field] || formObject[field].trim() === '') {
                 isValid = false;
-                const fieldName = field === 'entry.YOUR_NAME_ENTRY_ID' ? 'Name' : 
-                                 field === 'entry.YOUR_EMAIL_ENTRY_ID' ? 'Email' : 'Message';
+                const fieldName = field === 'entry.641543091' ? 'Full Name' : 'Current Challenges and Goals';
                 errorMessage += `${fieldName} is required.\n`;
                 input.style.borderColor = '#e74c3c';
             } else {
                 input.style.borderColor = '#e9ecef';
             }
         });
-
-        // Email validation
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (formObject['entry.YOUR_EMAIL_ENTRY_ID'] && !emailRegex.test(formObject['entry.YOUR_EMAIL_ENTRY_ID'])) {
-            isValid = false;
-            errorMessage += 'Please enter a valid email address.\n';
-            contactForm.querySelector('[name="entry.YOUR_EMAIL_ENTRY_ID"]').style.borderColor = '#e74c3c';
-        }
 
         if (!isValid) {
             alert('Please correct the following errors:\n\n' + errorMessage);

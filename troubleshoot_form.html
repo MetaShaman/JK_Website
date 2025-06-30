@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Troubleshooting - Joon Kim</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .troubleshoot-section {
+            background: #f9f9f9;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid #2d5a27;
+        }
+        .test-form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        .form-group {
+            margin: 15px 0;
+        }
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #2d5a27;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .btn {
+            background: #2d5a27;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        .btn:hover {
+            background: #1a3d1a;
+        }
+        .btn.secondary {
+            background: #6c757d;
+        }
+        .btn.secondary:hover {
+            background: #545b62;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .code-block {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin: 10px 0;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .checklist {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .checklist ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .checklist li {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Google Form Integration Troubleshooting</h1>
+    
+    <div class="troubleshoot-section">
+        <h2>Step 1: Verify Form Configuration</h2>
+        <div class="checklist">
+            <h4>Current Configuration:</h4>
+            <ul>
+                <li><strong>Form Action:</strong> https://docs.google.com/forms/d/e/1FAIpQLSf76wgQZ6fUxB7f2Zt1Ppjw1hlQcoKqmk4Yn0O2R5Qmy9UHJA/formResponse</li>
+                <li><strong>Method:</strong> POST</li>
+                <li><strong>Target:</strong> hidden_iframe</li>
+            </ul>
+        </div>
+        
+        <div class="status warning">
+            <strong>Common Issues:</strong><br>
+            1. Form action URL might be incorrect<br>
+            2. Entry IDs might be wrong<br>
+            3. Form might be set to collect email addresses<br>
+            4. CORS restrictions might be blocking submission
+        </div>
+    </div>
+    
+    <div class="troubleshoot-section">
+        <h2>Step 2: Test Direct Form Submission</h2>
+        <p>Let's test if the form action URL is correct by submitting directly to Google Forms:</p>
+        
+        <div class="test-form">
+            <form id="directForm" action="https://docs.google.com/forms/d/e/1FAIpQLSf76wgQZ6fUxB7f2Zt1Ppjw1hlQcoKqmk4Yn0O2R5Qmy9UHJA/formResponse" method="POST" target="_blank">
+                <div class="form-group">
+                    <label>Test Name:</label>
+                    <input type="text" name="entry.641543091" value="DIRECT_TEST_NAME">
+                </div>
+                <div class="form-group">
+                    <label>Test Challenges:</label>
+                    <textarea name="entry.771214362" rows="3">DIRECT_TEST_CHALLENGES</textarea>
+                </div>
+                <button type="submit" class="btn">Submit Direct Test (Opens New Tab)</button>
+            </form>
+        </div>
+        
+        <div class="status info">
+            <strong>What to expect:</strong><br>
+            - If the form action is correct, you'll see a Google Forms confirmation page<br>
+            - If it's wrong, you'll get an error page<br>
+            - Check your Google Form responses for "DIRECT_TEST_NAME"
+        </div>
+    </div>
+    
+    <div class="troubleshoot-section">
+        <h2>Step 3: Check Form Settings</h2>
+        <div class="checklist">
+            <h4>Go to your Google Form and check:</h4>
+            <ul>
+                <li>Is the form published and accepting responses?</li>
+                <li>Are there any required fields we're missing?</li>
+                <li>Is there an email collection field we need to include?</li>
+                <li>Are there any form restrictions or quotas?</li>
+            </ul>
+        </div>
+        
+        <button class="btn secondary" onclick="openGoogleForm()">Open Your Google Form</button>
+    </div>
+    
+    <div class="troubleshoot-section">
+        <h2>Step 4: Test with Minimal Data</h2>
+        <p>Let's test with just the required fields:</p>
+        
+        <div class="test-form">
+            <form id="minimalForm" action="https://docs.google.com/forms/d/e/1FAIpQLSf76wgQZ6fUxB7f2Zt1Ppjw1hlQcoKqmk4Yn0O2R5Qmy9UHJA/formResponse" method="POST" target="minimal_iframe">
+                <div class="form-group">
+                    <label>Full Name (Required):</label>
+                    <input type="text" name="entry.641543091" value="MINIMAL_TEST" required>
+                </div>
+                <div class="form-group">
+                    <label>Challenges (Required):</label>
+                    <textarea name="entry.771214362" rows="3" required>MINIMAL_TEST_CHALLENGES</textarea>
+                </div>
+                <button type="submit" class="btn">Submit Minimal Test</button>
+            </form>
+            <iframe name="minimal_iframe" style="display:none;"></iframe>
+        </div>
+    </div>
+    
+    <div class="troubleshoot-section">
+        <h2>Step 5: Check for Email Collection</h2>
+        <p>Your Google Form might be collecting email addresses automatically. Let's check:</p>
+        
+        <div class="test-form">
+            <form id="emailForm" action="https://docs.google.com/forms/d/e/1FAIpQLSf76wgQZ6fUxB7f2Zt1Ppjw1hlQcoKqmk4Yn0O2R5Qmy9UHJA/formResponse" method="POST" target="email_iframe">
+                <div class="form-group">
+                    <label>Email (if required):</label>
+                    <input type="email" name="emailAddress" value="test@example.com">
+                </div>
+                <div class="form-group">
+                    <label>Full Name:</label>
+                    <input type="text" name="entry.641543091" value="EMAIL_TEST">
+                </div>
+                <div class="form-group">
+                    <label>Challenges:</label>
+                    <textarea name="entry.771214362" rows="3">EMAIL_TEST_CHALLENGES</textarea>
+                </div>
+                <button type="submit" class="btn">Submit with Email</button>
+            </form>
+            <iframe name="email_iframe" style="display:none;"></iframe>
+        </div>
+    </div>
+    
+    <div class="troubleshoot-section">
+        <h2>Step 6: Debug Information</h2>
+        <div class="code-block">
+            <strong>Current Entry IDs being used:</strong><br>
+            entry.428724634 - Land Love Question<br>
+            entry.641543091 - Full Name<br>
+            entry.1764103006 - Phone Number<br>
+            entry.1531760759 - Land Location<br>
+            entry.789863818 - Land Size<br>
+            entry.911095196 - Services<br>
+            entry.847273278 - Timeline<br>
+            entry.771214362 - Challenges/Goals<br>
+            entry.2117189622 - Contact Method<br>
+            entry.2015429434 - Best Time
+        </div>
+        
+        <div class="status info">
+            <strong>Next Steps:</strong><br>
+            1. Try the direct form submission first<br>
+            2. Check your Google Form settings<br>
+            3. Test with minimal data<br>
+            4. Report back what you find
+        </div>
+    </div>
+    
+    <div id="testResult"></div>
+    
+    <script>
+        function openGoogleForm() {
+            window.open('https://docs.google.com/forms/d/e/1FAIpQLSf76wgQZ6fUxB7f2Zt1Ppjw1hlQcoKqmk4Yn0O2R5Qmy9UHJA/viewform', '_blank');
+        }
+        
+        // Add event listeners for form submissions
+        document.getElementById('minimalForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const resultDiv = document.getElementById('testResult');
+            resultDiv.innerHTML = '<div class="status info">Submitting minimal test...</div>';
+            
+            // Submit form
+            const form = this;
+            const tempForm = document.createElement('form');
+            tempForm.method = 'POST';
+            tempForm.action = form.action;
+            tempForm.target = 'minimal_iframe';
+            tempForm.style.display = 'none';
+            
+            // Copy form data
+            const formData = new FormData(form);
+            for (let [key, value] of formData.entries()) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = value;
+                tempForm.appendChild(input);
+            }
+            
+            document.body.appendChild(tempForm);
+            tempForm.submit();
+            document.body.removeChild(tempForm);
+            
+            setTimeout(() => {
+                resultDiv.innerHTML = '<div class="status success">Minimal test submitted! Check your Google Form responses for "MINIMAL_TEST".</div>';
+            }, 2000);
+        });
+        
+        document.getElementById('emailForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const resultDiv = document.getElementById('testResult');
+            resultDiv.innerHTML = '<div class="status info">Submitting email test...</div>';
+            
+            // Submit form
+            const form = this;
+            const tempForm = document.createElement('form');
+            tempForm.method = 'POST';
+            tempForm.action = form.action;
+            tempForm.target = 'email_iframe';
+            tempForm.style.display = 'none';
+            
+            // Copy form data
+            const formData = new FormData(form);
+            for (let [key, value] of formData.entries()) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = value;
+                tempForm.appendChild(input);
+            }
+            
+            document.body.appendChild(tempForm);
+            tempForm.submit();
+            document.body.removeChild(tempForm);
+            
+            setTimeout(() => {
+                resultDiv.innerHTML = '<div class="status success">Email test submitted! Check your Google Form responses for "EMAIL_TEST".</div>';
+            }, 2000);
+        });
+    </script>
+</body>
+</html> 
