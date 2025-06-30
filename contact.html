@@ -198,14 +198,31 @@
                             <label class="checkbox-label">
                                 <input type="checkbox" id="schedule-consultation" name="scheduleConsultation">
                                 <span class="checkmark"></span>
-                                I'd like to schedule a consultation call
+                                I'd like to schedule a discovery call (recommended for new clients)
                             </label>
+                            <small class="form-help-text">💡 Tip: Fill out the form above first, then schedule your call below for the best experience.</small>
                         </div>
                         
                         <!-- Calendly Widget Container (hidden by default) -->
                         <div id="calendly-container" class="calendly-container" style="display: none;">
-                            <h3>Schedule Your Discovery Call</h3>
-                            <p>Choose a time that works best for you. This will be a 30-minute complimentary discovery call to discuss your land stewardship needs and goals.</p>
+                            <div class="calendly-header">
+                                <h3>📅 Schedule Your Discovery Call</h3>
+                                <p>Choose a time that works best for you. This will be a 30-minute complimentary discovery call to discuss your land stewardship needs and goals.</p>
+                                <div class="calendly-instructions">
+                                    <div class="instruction-step">
+                                        <span class="step-number">1</span>
+                                        <span>Fill out the form above with your project details</span>
+                                    </div>
+                                    <div class="instruction-step">
+                                        <span class="step-number">2</span>
+                                        <span>Schedule your discovery call below</span>
+                                    </div>
+                                    <div class="instruction-step">
+                                        <span class="step-number">3</span>
+                                        <span>Submit the form to send your information</span>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="calendly-inline-widget" data-url="https://calendly.com/joonkim_schedule/land-stewardship-discovery-call" style="min-width:320px;height:700px;"></div>
                         </div>
                         
@@ -256,6 +273,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const scheduleCheckbox = document.getElementById('schedule-consultation');
             const calendlyContainer = document.getElementById('calendly-container');
+            const contactForm = document.getElementById('contact-form');
             
             if (scheduleCheckbox && calendlyContainer) {
                 scheduleCheckbox.addEventListener('change', function() {
@@ -265,6 +283,24 @@
                         calendlyContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     } else {
                         calendlyContainer.style.display = 'none';
+                    }
+                });
+            }
+            
+            // Form submission enhancement
+            if (contactForm) {
+                contactForm.addEventListener('submit', function(e) {
+                    const isSchedulingChecked = scheduleCheckbox && scheduleCheckbox.checked;
+                    
+                    if (isSchedulingChecked) {
+                        // Show a friendly reminder to complete both actions
+                        const reminder = confirm('Great! You\'ve chosen to schedule a discovery call. Please make sure you\'ve:\n\n1. ✅ Filled out the form above\n2. 📅 Scheduled your discovery call\n3. 📤 Submitted this form\n\nClick OK to continue with form submission, or Cancel to review your information.');
+                        
+                        if (!reminder) {
+                            e.preventDefault();
+                            // Scroll back to the form
+                            contactForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
                     }
                 });
             }
