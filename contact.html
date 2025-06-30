@@ -458,100 +458,133 @@
             }, 2000);
         }
 
-        // Handle call scheduled event
-        function handleCallScheduled(details) {
-            console.log('🎉 Call scheduled with details:', details);
-            console.log('🎉 Full details object:', JSON.stringify(details, null, 2));
-            callScheduled = true;
+        // Enhanced Calendly event detection
+        window.addEventListener('message', function(event) {
+            // Only process messages from Calendly
+            if (event.origin !== 'https://calendly.com') return;
             
-            // Extract booking information from Calendly event data
+            const data = event.data;
+            
+            // Method 1: Direct event detection
+            if (data && data.event === 'calendly.event_scheduled') {
+                console.log('🎉 Call scheduled with details:', data);
+                handleCallScheduled(data);
+            }
+            
+            // Method 2: Enhanced message parsing
+            if (data && typeof data === 'object') {
+                if (data.event === 'calendly.event_scheduled') {
+                    console.log('🎉 Call scheduled with details:', data);
+                    handleCallScheduled(data);
+                }
+            }
+        });
+
+        // Function to handle call scheduling
+        function handleCallScheduled(details) {
+            console.log('🎉 Full details object:', details);
+            
+            // Extract booking details
             let bookingData = {
                 booked: 'Yes',
                 appointmentType: 'Land Stewardship Discovery Call',
                 dateTime: 'Scheduled via Calendly',
-                info: 'Discovery call booked via Calendly'
+                info: 'Booking details captured'
             };
             
-            // Try to extract more detailed information from the event data
-            // Handle different data structures from various Calendly event sources
-            let payload = null;
-            
-            if (details && details.payload) {
-                payload = details.payload;
-                console.log('📅 Extracting booking details from details.payload:', payload);
-            } else if (details && details.data && details.data.payload) {
-                payload = details.data.payload;
-                console.log('📅 Extracting booking details from details.data.payload:', payload);
-            } else if (details && details.event && details.payload) {
-                payload = details.payload;
-                console.log('📅 Extracting booking details from event payload:', payload);
-            } else {
-                console.log('📅 No payload found in details, using full details object');
-                payload = details;
-            }
-            
-            if (payload) {
-                console.log('📅 Processing payload:', JSON.stringify(payload, null, 2));
-                
-                // If we have event URI, we can extract the event ID
-                if (payload.event && payload.event.uri) {
-                    const eventUri = payload.event.uri;
-                    const eventId = eventUri.split('/').pop();
-                    bookingData.info = `Event ID: ${eventId} | Booked via Calendly`;
-                    console.log('🎫 Event ID extracted:', eventId);
-                }
-                
-                // If we have invitee URI, we can extract the invitee ID
-                if (payload.invitee && payload.invitee.uri) {
-                    const inviteeUri = payload.invitee.uri;
-                    const inviteeId = inviteeUri.split('/').pop();
-                    bookingData.info += ` | Invitee ID: ${inviteeId}`;
-                    console.log('👤 Invitee ID extracted:', inviteeId);
-                }
-                
-                // Try to extract date/time information if available
-                if (payload.event && payload.event.start_time) {
-                    const startTime = new Date(payload.event.start_time);
-                    bookingData.dateTime = startTime.toLocaleString('en-US', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        hour: 'numeric',
-                        minute: '2-digit',
-                        timeZoneName: 'short'
-                    });
-                    console.log('📅 Date/Time extracted:', bookingData.dateTime);
-                }
-                
-                // Try to extract event name if available
-                if (payload.event && payload.event.name) {
-                    bookingData.appointmentType = payload.event.name;
-                    console.log('📋 Event name extracted:', bookingData.appointmentType);
-                }
-            }
-            
-            // Update hidden fields with booking information
             try {
-                const bookedField = document.getElementById('entry_booking_booked');
-                const typeField = document.getElementById('entry_booking_appointment_type');
-                const dateTimeField = document.getElementById('entry_booking_date_time');
-                const infoField = document.getElementById('entry_booking_info');
-                
-                if (bookedField) bookedField.value = bookingData.booked;
-                if (typeField) typeField.value = bookingData.appointmentType;
-                if (dateTimeField) dateTimeField.value = bookingData.dateTime;
-                if (infoField) infoField.value = bookingData.info;
-                
-                console.log('✅ Booking data stored in form fields:', bookingData);
-                
+                if (details.payload) {
+                    console.log('📅 Extracting booking details from details.payload:', details.payload);
+                    
+                    const payload = details.payload;
+                    console.log('📅 Processing payload:', payload);
+                    
+                    // Extract event ID
+                    if (payload.event && payload.event.uri) {
+                        const eventUri = payload.event.uri;
+                        const eventId = eventUri.split('/').pop();
+                        console.log('🎫 Event ID extracted:', eventId);
+                        bookingData.info = `Event ID: ${eventId}`;
+                    }
+                    
+                    // Extract invitee ID
+                    if (payload.invitee && payload.invitee.uri) {
+                        const inviteeUri = payload.invitee.uri;
+                        const inviteeId = inviteeUri.split('/').pop();
+                        console.log('👤 Invitee ID extracted:', inviteeId);
+                        bookingData.info += ` | Invitee ID: ${inviteeId}`;
+                    }
+                }
             } catch (error) {
-                console.error('❌ Error storing booking data:', error);
+                console.error('❌ Error extracting booking details:', error);
+                bookingData.info = 'Error extracting booking details';
             }
             
-            // Update UI
-            updateCallStatus();
-            enableFormSubmission();
+            // Store booking data in form fields
+            const bookedField = document.getElementById('booked');
+            const appointmentTypeField = document.getElementById('appointmentType');
+            const dateTimeField = document.getElementById('dateTime');
+            const infoField = document.getElementById('info');
+            
+            if (bookedField) bookedField.value = bookingData.booked;
+            if (appointmentTypeField) appointmentTypeField.value = bookingData.appointmentType;
+            if (dateTimeField) dateTimeField.value = bookingData.dateTime;
+            if (infoField) infoField.value = bookingData.info;
+            
+            console.log('✅ Booking data stored in form fields:', bookingData);
+            
+            // Update call status
+            updateCallStatus(true);
+        }
+
+        // Function to update call status
+        function updateCallStatus(callScheduled) {
+            const callScheduledStatus = document.getElementById('call-scheduled-status');
+            const callNotScheduledStatus = document.getElementById('call-not-scheduled-status');
+            
+            if (callScheduled) {
+                console.log('🎉 Updating call status - call scheduled!');
+                
+                if (callScheduledStatus) {
+                    console.log('🔍 Call scheduled status element:', callScheduledStatus);
+                    callScheduledStatus.style.display = 'block';
+                    console.log('✅ Found call-scheduled-status element, showing message...');
+                }
+                
+                if (callNotScheduledStatus) {
+                    callNotScheduledStatus.style.display = 'none';
+                }
+                
+                // Add success message to the page
+                const successMessage = document.createElement('div');
+                successMessage.className = 'success-message';
+                successMessage.innerHTML = `
+                    <div style="background: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px solid #c3e6cb;">
+                        <strong>✅ Call Scheduled Successfully!</strong><br>
+                        Your 15-minute discovery call has been scheduled. You can now submit the form below.
+                    </div>
+                `;
+                
+                const form = document.getElementById('contactForm');
+                if (form) {
+                    form.parentNode.insertBefore(successMessage, form);
+                    console.log('✅ Success message added to DOM');
+                }
+                
+                // Enable form submission
+                window.callScheduled = true;
+                console.log('✅ Enabling form submission');
+            } else {
+                if (callScheduledStatus) {
+                    callScheduledStatus.style.display = 'none';
+                }
+                
+                if (callNotScheduledStatus) {
+                    callNotScheduledStatus.style.display = 'block';
+                }
+                
+                window.callScheduled = false;
+            }
         }
 
         // Monitor the call-scheduled field for changes (fallback method)
@@ -576,66 +609,6 @@
             }
         }
 
-        // Update call status in UI
-        function updateCallStatus() {
-            console.log('🎉 Updating call status - call scheduled!');
-            
-            const callScheduledStatus = document.getElementById('call-scheduled-status');
-            console.log('🔍 Call scheduled status element:', callScheduledStatus);
-            
-            if (callScheduledStatus) {
-                console.log('✅ Found call-scheduled-status element, showing message...');
-                callScheduledStatus.style.display = 'block';
-                callScheduledStatus.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                
-                // Clear any existing messages
-                callScheduledStatus.innerHTML = '';
-                
-                // Show prominent success message
-                const successMessage = document.createElement('div');
-                successMessage.className = 'alert alert-success';
-                successMessage.style.cssText = `
-                    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-                    border: 2px solid #28a745;
-                    border-radius: 10px;
-                    padding: 20px;
-                    margin: 15px 0;
-                    text-align: center;
-                    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-                `;
-                successMessage.innerHTML = `
-                    <div style="font-size: 24px; margin-bottom: 10px;">🎉</div>
-                    <h4 style="color: #155724; margin-bottom: 10px; font-weight: bold;">Call Successfully Booked!</h4>
-                    <p style="color: #155724; margin-bottom: 15px; font-size: 16px;">
-                        Your 15-minute discovery call has been scheduled. You'll receive a confirmation email shortly.
-                    </p>
-                    <div style="background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #28a745; margin: 10px 0;">
-                        <strong style="color: #155724;">✅ Form is now unlocked</strong><br>
-                        <small style="color: #6c757d;">You can now submit your project details below</small>
-                    </div>
-                `;
-                callScheduledStatus.appendChild(successMessage);
-                
-                // Add a subtle animation
-                successMessage.style.animation = 'fadeInUp 0.5s ease-out';
-                console.log('✅ Success message added to DOM');
-            } else {
-                console.error('❌ Call scheduled status element not found!');
-            }
-        }
-
-        // Enable form submission
-        function enableFormSubmission() {
-            console.log('✅ Enabling form submission');
-            const submitButton = document.querySelector('#contactForm button[type="submit"]');
-            if (submitButton) {
-                submitButton.disabled = false;
-                submitButton.textContent = 'Submit Project Details';
-                submitButton.style.opacity = '1';
-                submitButton.style.cursor = 'pointer';
-            }
-        }
-
         // Test function to simulate call scheduling (for debugging)
         function simulateCallScheduled() {
             console.log('🧪 Simulating call scheduled');
@@ -645,85 +618,53 @@
         // Start Calendly initialization
         initializeCalendly();
 
-        // Form submission handling
-        document.addEventListener('DOMContentLoaded', function() {
-            const contactForm = document.getElementById('contactForm');
-            const discoveryCallRadio = document.querySelector('input[value="discovery_call"]');
-            const emailOnlyRadio = document.querySelector('input[value="email_only"]');
-            const calendlyContainer = document.getElementById('calendly-container');
+        // Form submission handler
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            const discoveryCallSelected = document.querySelector('input[name="consultation_type"]:checked')?.value === 'discovery_call';
+            const callScheduled = window.callScheduled || false;
             
-            // Function to handle radio button changes
-            function handleConsultationPreference() {
-                if (discoveryCallRadio.checked) {
-                    console.log('📅 Discovery call selected - showing Calendly widget');
-                    calendlyContainer.style.display = 'block';
-                    calendlyContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                } else if (emailOnlyRadio.checked) {
-                    console.log('📧 Email only selected - hiding Calendly widget');
-                    calendlyContainer.style.display = 'none';
-                }
-            }
+            console.log('📝 Form submission attempt:');
+            console.log('- Discovery call selected:', discoveryCallSelected);
+            console.log('- Call scheduled:', callScheduled);
             
-            // Add event listeners to radio buttons
-            if (discoveryCallRadio) {
-                discoveryCallRadio.addEventListener('change', handleConsultationPreference);
-            }
-            if (emailOnlyRadio) {
-                emailOnlyRadio.addEventListener('change', handleConsultationPreference);
-            }
-            
-            // Check initial state
-            handleConsultationPreference();
-            
-            // Form submission blocking
-            if (contactForm) {
-                contactForm.addEventListener('submit', function(e) {
-                    const isDiscoveryCallSelected = discoveryCallRadio && discoveryCallRadio.checked;
-                    
-                    console.log('📝 Form submission attempt:');
-                    console.log('- Discovery call selected:', isDiscoveryCallSelected);
-                    console.log('- Call scheduled:', callScheduled);
-                    
-                    if (isDiscoveryCallSelected && !callScheduled) {
-                        e.preventDefault();
-                        console.log('❌ Form submission blocked - call not scheduled');
-                        
-                        // Show blocking message
-                        const blockingMessage = document.createElement('div');
-                        blockingMessage.className = 'alert alert-warning';
-                        blockingMessage.style.cssText = `
-                            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-                            border: 2px solid #ffc107;
-                            border-radius: 10px;
-                            padding: 15px;
-                            margin: 15px 0;
-                            text-align: center;
-                        `;
-                        blockingMessage.innerHTML = `
-                            <strong style="color: #856404;">⚠️ Please Schedule Your Call First</strong><br>
-                            <small style="color: #856404;">You selected a discovery call but haven't scheduled it yet. Please complete your booking above before submitting the form.</small>
-                        `;
-                        
-                        // Insert message before the form
-                        contactForm.parentNode.insertBefore(blockingMessage, contactForm);
-                        
-                        // Scroll to the message
-                        blockingMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        
-                        // Remove message after 5 seconds
-                        setTimeout(function() {
-                            if (blockingMessage.parentNode) {
-                                blockingMessage.parentNode.removeChild(blockingMessage);
-                            }
-                        }, 5000);
-                        
-                        return false;
-                    } else {
-                        console.log('✅ Form submission allowed');
-                        return true;
+            // If discovery call is selected but not scheduled, block submission
+            if (discoveryCallSelected && !callScheduled) {
+                e.preventDefault();
+                
+                // Show gentle reminder
+                const reminder = document.createElement('div');
+                reminder.className = 'alert alert-warning';
+                reminder.style.cssText = `
+                    background: #fff3cd;
+                    border: 1px solid #ffeaa7;
+                    color: #856404;
+                    padding: 15px;
+                    border-radius: 5px;
+                    margin: 15px 0;
+                    text-align: center;
+                `;
+                reminder.innerHTML = `
+                    <strong>📅 Please Schedule Your Call First</strong><br>
+                    To proceed, please schedule your 15-minute discovery call using the calendar above.
+                `;
+                
+                const form = document.getElementById('contactForm');
+                form.parentNode.insertBefore(reminder, form);
+                
+                // Remove reminder after 5 seconds
+                setTimeout(() => {
+                    if (reminder.parentNode) {
+                        reminder.parentNode.removeChild(reminder);
                     }
-                });
+                }, 5000);
+                
+                return false;
             }
+            
+            console.log('✅ Form submission allowed');
+            
+            // Allow normal form submission (will open Google Forms in new tab)
+            return true;
         });
     </script>
 </body>
