@@ -306,6 +306,9 @@
     <!-- Calendly Integration -->
     <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
     <script>
+        // Page identifier
+        console.log('📍 Loading contact.html - Main contact page');
+        
         // Simple Calendly integration
         function setupCalendlyIntegration() {
             console.log('🔧 Setting up simple Calendly integration...');
@@ -394,6 +397,13 @@
         
         // Start Calendly integration
         setupCalendlyIntegration();
+        
+        // Debug: Check for any old function references
+        console.log('🔍 Debug: Checking for old function references...');
+        console.log('- setupCalendlyListener exists:', typeof setupCalendlyListener);
+        console.log('- initCalendlyListener exists:', typeof initCalendlyListener);
+        console.log('- checkCalendlyLoaded exists:', typeof checkCalendlyLoaded);
+        console.log('- Current file functions:', Object.keys(window).filter(key => key.includes('Calendly')));
         
         // Handle consultation preference radio buttons
         document.addEventListener('DOMContentLoaded', function() {
