@@ -239,7 +239,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="calendly-inline-widget" data-url="https://calendly.com/joonkim_schedule/land-stewardship-discovery-call?prefill[email]=&prefill[name]=&prefill[first_name]=&prefill[last_name]=&prefill[phone]=&prefill[location]=&prefill[note]=" style="min-width:320px;height:700px;"></div>
+                            <div class="calendly-inline-widget" data-url="https://calendly.com/joonkimland/discovery-call" style="min-width:320px;height:700px;"></div>
                             <div id="call-scheduled-status" class="call-status" style="display: none;">
                                 <div class="status-success">
                                     <i class="fas fa-check-circle"></i>
@@ -318,67 +318,149 @@
         // Page identifier
         console.log('📍 Loading contact.html - Main contact page');
         
-        // Simple Calendly integration
-        function setupCalendlyIntegration() {
-            console.log('🔧 Setting up simple Calendly integration...');
+        // Calendly integration
+        let callScheduled = false;
+        let calendlyReady = false;
+        let calendlyWidget = null;
+
+        // Initialize Calendly with better error handling and longer timeout
+        function initializeCalendly() {
+            console.log('🔄 Initializing Calendly...');
             
             // Wait for Calendly to be available
-            const checkCalendly = setInterval(function() {
-                if (window.Calendly && (typeof window.Calendly === 'function' || typeof window.Calendly === 'object')) {
+            let attempts = 0;
+            const maxAttempts = 50; // Increased from 20 to 50 (5 seconds)
+            
+            const checkCalendly = setInterval(() => {
+                attempts++;
+                console.log(`🔄 Calendly check attempt ${attempts}/${maxAttempts}`);
+                
+                if (window.Calendly && typeof window.Calendly.initInlineWidget === 'function') {
                     clearInterval(checkCalendly);
                     console.log('✅ Calendly is ready');
+                    calendlyReady = true;
                     
-                    // Set up simple event listener
+                    // Initialize the widget
                     try {
-                        if (typeof window.Calendly === 'function') {
-                            window.Calendly('onEventScheduled', function(e) {
-                                console.log('🎉 Call scheduled:', e);
-                                markCallAsScheduled(e);
-                            });
-                            console.log('✅ Calendly event listener set up (function)');
-                        } else if (window.Calendly.initInlineWidget) {
-                            // Calendly loaded as object, try different approach
-                            console.log('✅ Calendly loaded as object, using simple field monitoring');
-                            
-                            // Simple approach: Monitor the call-scheduled field
-                            const callScheduledField = document.getElementById('call-scheduled');
-                            if (callScheduledField) {
-                                const observer = new MutationObserver(function(mutations) {
-                                    mutations.forEach(function(mutation) {
-                                        if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
-                                            const newValue = callScheduledField.value;
-                                            console.log('🔍 Call scheduled field changed to:', newValue);
-                                            if (newValue === 'true') {
-                                                console.log('🎉 Call scheduled field is true - showing success message');
-                                                showBookingSuccessMessage();
-                                            }
-                                        }
-                                    });
-                                });
-                                
-                                observer.observe(callScheduledField, {
-                                    attributes: true,
-                                    attributeFilter: ['value']
-                                });
-                                console.log('👁️ Monitoring call-scheduled field for changes');
-                            }
-                        }
+                        calendlyWidget = window.Calendly.initInlineWidget({
+                            url: 'https://calendly.com/joonkimland/discovery-call',
+                            parentElement: document.getElementById('calendly-widget'),
+                            prefill: {},
+                            utm: {}
+                        });
+                        console.log('✅ Calendly widget initialized');
+                        
+                        // Set up event listeners after widget is ready
+                        setTimeout(setupCalendlyEventListeners, 1000);
+                        
                     } catch (error) {
-                        console.error('❌ Error setting up Calendly listener:', error);
+                        console.error('❌ Error initializing Calendly widget:', error);
+                    }
+                    
+                } else if (attempts >= maxAttempts) {
+                    clearInterval(checkCalendly);
+                    console.error('❌ Calendly failed to load within timeout');
+                    document.getElementById('calendly-status').textContent = 'Calendly failed to load. Please refresh the page.';
+                }
+            }, 100);
+        }
+
+        // Set up Calendly event listeners with multiple approaches
+        function setupCalendlyEventListeners() {
+            console.log('🎧 Setting up Calendly event listeners...');
+            
+            // Method 1: Listen for Calendly events on the document
+            document.addEventListener('calendly:event_scheduled', function(e) {
+                console.log('🎉 Calendly event scheduled:', e.detail);
+                handleCallScheduled(e.detail);
+            });
+            
+            document.addEventListener('calendly:event_type_viewed', function(e) {
+                console.log('👁️ Calendly event type viewed:', e.detail);
+            });
+            
+            document.addEventListener('calendly:profile_page_viewed', function(e) {
+                console.log('👤 Calendly profile viewed:', e.detail);
+            });
+            
+            // Method 2: Listen for iframe messages
+            window.addEventListener('message', function(e) {
+                if (e.data && e.data.event && e.data.event.indexOf('calendly') !== -1) {
+                    console.log('📨 Calendly message received:', e.data);
+                    if (e.data.event === 'calendly:event_scheduled') {
+                        handleCallScheduled(e.data.payload);
                     }
                 }
-            }, 1000);
+            });
             
-            // Stop checking after 30 seconds
-            setTimeout(function() {
-                clearInterval(checkCalendly);
-                console.log('⏰ Calendly setup timeout');
-            }, 30000);
+            // Method 3: Monitor the widget iframe directly
+            const widgetElement = document.getElementById('calendly-widget');
+            if (widgetElement) {
+                const observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                        if (mutation.type === 'childList') {
+                            const iframe = widgetElement.querySelector('iframe');
+                            if (iframe) {
+                                console.log('🖼️ Calendly iframe detected');
+                                // Listen for iframe load events
+                                iframe.addEventListener('load', function() {
+                                    console.log('🖼️ Calendly iframe loaded');
+                                });
+                            }
+                        }
+                    });
+                });
+                
+                observer.observe(widgetElement, { childList: true, subtree: true });
+            }
+            
+            // Method 4: Monitor form fields for changes (fallback)
+            monitorCallScheduledField();
         }
-        
-        // Function to show booking success message
-        function showBookingSuccessMessage() {
-            console.log('🎉 Showing booking success message');
+
+        // Handle call scheduled event
+        function handleCallScheduled(details) {
+            console.log('🎉 Call scheduled with details:', details);
+            callScheduled = true;
+            
+            // Update hidden fields with booking information
+            if (details) {
+                document.getElementById('entry_booking_booked').value = 'Yes';
+                document.getElementById('entry_booking_appointment_type').value = 'Discovery Call';
+                document.getElementById('entry_booking_date_time').value = details.startTime || 'Scheduled';
+                document.getElementById('entry_booking_info').value = JSON.stringify(details);
+            }
+            
+            // Update UI
+            updateCallStatus();
+            enableFormSubmission();
+        }
+
+        // Monitor the call-scheduled field for changes (fallback method)
+        function monitorCallScheduledField() {
+            console.log('👁️ Monitoring call-scheduled field for changes');
+            
+            const field = document.getElementById('call-scheduled');
+            if (field) {
+                const observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                        if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
+                            const value = field.value;
+                            console.log('📝 Call-scheduled field changed to:', value);
+                            if (value === 'true' || value === '1') {
+                                handleCallScheduled({ startTime: 'Scheduled via field change' });
+                            }
+                        }
+                    });
+                });
+                
+                observer.observe(field, { attributes: true, attributeFilter: ['value'] });
+            }
+        }
+
+        // Update call status in UI
+        function updateCallStatus() {
+            console.log('🎉 Updating call status - call scheduled!');
             
             const callScheduledStatus = document.getElementById('call-scheduled-status');
             if (callScheduledStatus) {
@@ -417,71 +499,28 @@
                 successMessage.style.animation = 'fadeInUp 0.5s ease-out';
             }
         }
-        
-        // Simple function to mark call as scheduled
-        function markCallAsScheduled(eventData) {
-            console.log('✅ Marking call as scheduled with data:', eventData);
-            
-            // Update hidden fields
-            const appointmentBooked = document.getElementById('appointment-booked');
-            const appointmentType = document.getElementById('appointment-type');
-            const appointmentDate = document.getElementById('appointment-date');
-            const appointmentTime = document.getElementById('appointment-time');
-            const appointmentInfo = document.getElementById('appointment-info');
-            const callScheduledField = document.getElementById('call-scheduled');
-            
-            if (appointmentBooked) appointmentBooked.value = 'Yes';
-            if (appointmentType) appointmentType.value = 'Land Stewardship Discovery Call';
-            
-            // Try to extract date and time from event data
-            let extractedDate = 'Scheduled via Calendly';
-            let extractedTime = 'Scheduled via Calendly';
-            let extractedInfo = 'Land Stewardship Discovery Call - Scheduled via Calendly';
-            
-            if (eventData && eventData.data && eventData.data.payload && eventData.data.payload.event) {
-                const event = eventData.data.payload.event;
-                console.log('📅 Extracting event data:', event);
-                
-                if (event.start_time) {
-                    const startTime = new Date(event.start_time);
-                    extractedDate = startTime.toLocaleDateString('en-US', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                    });
-                    extractedTime = startTime.toLocaleTimeString('en-US', {
-                        hour: 'numeric',
-                        minute: '2-digit',
-                        timeZoneName: 'short'
-                    });
-                    console.log('📅 Extracted date:', extractedDate);
-                    console.log('⏰ Extracted time:', extractedTime);
-                }
-                
-                if (event.name) {
-                    extractedInfo = `Event: ${event.name}`;
-                    if (event.duration) extractedInfo += ` | Duration: ${event.duration} minutes`;
-                    if (event.location) extractedInfo += ` | Location: ${event.location}`;
-                }
+
+        // Enable form submission
+        function enableFormSubmission() {
+            console.log('✅ Enabling form submission');
+            const submitButton = document.querySelector('#contactForm button[type="submit"]');
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Submit Project Details';
+                submitButton.style.opacity = '1';
+                submitButton.style.cursor = 'pointer';
             }
-            
-            if (appointmentDate) appointmentDate.value = extractedDate;
-            if (appointmentTime) appointmentTime.value = extractedTime;
-            if (appointmentInfo) appointmentInfo.value = extractedInfo;
-            
-            // Update form state - this will trigger the field monitor
-            if (callScheduledField) {
-                callScheduledField.value = 'true';
-                console.log('✅ Call scheduled field set to true');
-            }
-            
-            console.log('✅ Call scheduled successfully');
         }
-        
-        // Start Calendly integration
-        setupCalendlyIntegration();
-        
+
+        // Test function to simulate call scheduling (for debugging)
+        function simulateCallScheduled() {
+            console.log('🧪 Simulating call scheduled');
+            handleCallScheduled({ startTime: 'Test simulation' });
+        }
+
+        // Start Calendly initialization
+        initializeCalendly();
+
         // Form submission handling
         document.addEventListener('DOMContentLoaded', function() {
             const contactForm = document.getElementById('contactForm');
@@ -515,15 +554,13 @@
             // Form submission blocking
             if (contactForm) {
                 contactForm.addEventListener('submit', function(e) {
-                    const callScheduledField = document.getElementById('call-scheduled');
-                    const isCallScheduled = callScheduledField && callScheduledField.value === 'true';
                     const isDiscoveryCallSelected = discoveryCallRadio && discoveryCallRadio.checked;
                     
                     console.log('📝 Form submission attempt:');
                     console.log('- Discovery call selected:', isDiscoveryCallSelected);
-                    console.log('- Call scheduled:', isCallScheduled);
+                    console.log('- Call scheduled:', callScheduled);
                     
-                    if (isDiscoveryCallSelected && !isCallScheduled) {
+                    if (isDiscoveryCallSelected && !callScheduled) {
                         e.preventDefault();
                         console.log('❌ Form submission blocked - call not scheduled');
                         
@@ -564,40 +601,6 @@
                 });
             }
         });
-        
-        // Debug: Check for any old function references
-        console.log('🔍 Debug: Checking for old function references...');
-        console.log('- setupCalendlyListener exists:', typeof setupCalendlyListener);
-        console.log('- initCalendlyListener exists:', typeof initCalendlyListener);
-        console.log('- checkCalendlyLoaded exists:', typeof checkCalendlyLoaded);
-        console.log('- Current file functions:', Object.keys(window).filter(key => key.includes('Calendly')));
-        
-        // Test function for Calendly listener
-        function testCalendlyListener() {
-            console.log('🧪 Testing Calendly listener...');
-            console.log('- window.Calendly exists:', !!window.Calendly);
-            console.log('- window.Calendly type:', typeof window.Calendly);
-            if (window.Calendly && typeof window.Calendly === 'function') {
-                console.log('✅ Calendly is available as function');
-            } else if (window.Calendly && typeof window.Calendly === 'object') {
-                console.log('✅ Calendly is available as object');
-                console.log('- Calendly object properties:', Object.keys(window.Calendly));
-            } else {
-                console.log('❌ Calendly is not available');
-            }
-        }
-        
-        // Manual booking complete function
-        function manualBookingComplete() {
-            console.log('🧪 Manual booking complete...');
-            markCallAsScheduled();
-        }
-        
-        // Simulate call scheduled function
-        function simulateCallScheduled() {
-            console.log('🧪 Simulating call scheduled...');
-            markCallAsScheduled();
-        }
     </script>
 </body>
 </html>
