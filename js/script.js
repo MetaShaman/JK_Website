@@ -584,3 +584,237 @@ function enhanceAccessibility() {
 // Initialize accessibility enhancements
 document.addEventListener('DOMContentLoaded', enhanceAccessibility);
 
+// Calendly Integration for Contact Form
+function initializeCalendly() {
+    // Load Calendly script if not already loaded
+    if (!window.Calendly) {
+        const script = document.createElement('script');
+        script.src = 'https://assets.calendly.com/assets/external/widget.js';
+        script.async = true;
+        document.head.appendChild(script);
+    }
+    
+    // Initialize Calendly widget when script is loaded
+    const checkCalendly = setInterval(() => {
+        if (window.Calendly && typeof window.Calendly.initInlineWidget === 'function') {
+            clearInterval(checkCalendly);
+            
+            const calendlyContainer = document.getElementById('calendly-container');
+            if (calendlyContainer) {
+                window.Calendly.initInlineWidget({
+                    url: 'https://calendly.com/joonkim/land-stewardship-discovery-call',
+                    parentElement: calendlyContainer,
+                    prefill: {},
+                    utm: {}
+                });
+            }
+        }
+    }, 100);
+}
+
+// Enhanced Calendly event detection
+window.addEventListener('message', function(event) {
+    // Only process messages from Calendly
+    if (event.origin !== 'https://calendly.com') return;
+    
+    const data = event.data;
+    
+    // Method 1: Direct event detection
+    if (data && data.event === 'calendly.event_scheduled') {
+        console.log('🎉 Call scheduled with details:', data);
+        handleCallScheduled(data);
+    }
+    
+    // Method 2: Enhanced message parsing
+    if (data && typeof data === 'object') {
+        if (data.event === 'calendly.event_scheduled') {
+            console.log('🎉 Call scheduled with details:', data);
+            handleCallScheduled(data);
+        }
+    }
+});
+
+// Function to handle call scheduling
+function handleCallScheduled(details) {
+    console.log('🎉 Full details object:', details);
+    
+    // Extract booking details
+    let bookingData = {
+        booked: 'Yes',
+        appointmentType: 'Land Stewardship Discovery Call',
+        dateTime: 'Scheduled via Calendly',
+        info: 'Booking details captured'
+    };
+    
+    try {
+        if (details.payload) {
+            console.log('📅 Extracting booking details from details.payload:', details.payload);
+            
+            const payload = details.payload;
+            console.log('📅 Processing payload:', payload);
+            
+            // Extract event ID
+            if (payload.event && payload.event.uri) {
+                const eventUri = payload.event.uri;
+                const eventId = eventUri.split('/').pop();
+                console.log('🎫 Event ID extracted:', eventId);
+                bookingData.info = `Event ID: ${eventId}`;
+            }
+            
+            // Extract invitee ID
+            if (payload.invitee && payload.invitee.uri) {
+                const inviteeUri = payload.invitee.uri;
+                const inviteeId = inviteeUri.split('/').pop();
+                console.log('👤 Invitee ID extracted:', inviteeId);
+                bookingData.info += ` | Invitee ID: ${inviteeId}`;
+            }
+        }
+    } catch (error) {
+        console.error('❌ Error extracting booking details:', error);
+        bookingData.info = 'Error extracting booking details';
+    }
+    
+    // Store booking data in form fields
+    const bookedField = document.getElementById('booked');
+    const appointmentTypeField = document.getElementById('appointmentType');
+    const dateTimeField = document.getElementById('dateTime');
+    const infoField = document.getElementById('info');
+    
+    if (bookedField) bookedField.value = bookingData.booked;
+    if (appointmentTypeField) appointmentTypeField.value = bookingData.appointmentType;
+    if (dateTimeField) dateTimeField.value = bookingData.dateTime;
+    if (infoField) infoField.value = bookingData.info;
+    
+    console.log('✅ Booking data stored in form fields:', bookingData);
+    
+    // Update call status
+    updateCallStatus(true);
+}
+
+// Function to update call status
+function updateCallStatus(callScheduled) {
+    const callScheduledStatus = document.getElementById('call-scheduled-status');
+    const callNotScheduledStatus = document.getElementById('call-not-scheduled-status');
+    
+    if (callScheduled) {
+        console.log('🎉 Updating call status - call scheduled!');
+        
+        if (callScheduledStatus) {
+            console.log('🔍 Call scheduled status element:', callScheduledStatus);
+            callScheduledStatus.style.display = 'block';
+            console.log('✅ Found call-scheduled-status element, showing message...');
+        }
+        
+        if (callNotScheduledStatus) {
+            callNotScheduledStatus.style.display = 'none';
+        }
+        
+        // Add success message to the page
+        const successMessage = document.createElement('div');
+        successMessage.className = 'success-message';
+        successMessage.innerHTML = `
+            <div style="background: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px solid #c3e6cb;">
+                <strong>✅ Call Scheduled Successfully!</strong><br>
+                Your 15-minute discovery call has been scheduled. You can now submit the form below.
+            </div>
+        `;
+        
+        const form = document.getElementById('contactForm');
+        if (form) {
+            form.parentNode.insertBefore(successMessage, form);
+            console.log('✅ Success message added to DOM');
+        }
+        
+        // Enable form submission
+        window.callScheduled = true;
+        console.log('✅ Enabling form submission');
+    } else {
+        if (callScheduledStatus) {
+            callScheduledStatus.style.display = 'none';
+        }
+        
+        if (callNotScheduledStatus) {
+            callNotScheduledStatus.style.display = 'block';
+        }
+        
+        window.callScheduled = false;
+    }
+}
+
+// Test function to simulate call scheduling (for debugging)
+function simulateCallScheduled() {
+    console.log('🧪 Simulating call scheduled...');
+    const mockDetails = {
+        event: 'calendly.event_scheduled',
+        payload: {
+            event: {
+                uri: 'https://api.calendly.com/scheduled_events/test-event-id'
+            },
+            invitee: {
+                uri: 'https://api.calendly.com/scheduled_events/test-event-id/invitees/test-invitee-id'
+            }
+        }
+    };
+    handleCallScheduled(mockDetails);
+}
+
+// Initialize Calendly when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Calendly if we're on the contact page
+    if (document.getElementById('calendly-container')) {
+        initializeCalendly();
+    }
+    
+    // Form submission handler for contact form
+    const contactForm = document.getElementById('contactForm');
+    if (contactForm) {
+        contactForm.addEventListener('submit', function(e) {
+            const discoveryCallSelected = document.querySelector('input[name="consultation_type"]:checked')?.value === 'discovery_call';
+            const callScheduled = window.callScheduled || false;
+            
+            console.log('📝 Form submission attempt:');
+            console.log('- Discovery call selected:', discoveryCallSelected);
+            console.log('- Call scheduled:', callScheduled);
+            
+            // If discovery call is selected but not scheduled, block submission
+            if (discoveryCallSelected && !callScheduled) {
+                e.preventDefault();
+                
+                // Show gentle reminder
+                const reminder = document.createElement('div');
+                reminder.className = 'alert alert-warning';
+                reminder.style.cssText = `
+                    background: #fff3cd;
+                    border: 1px solid #ffeaa7;
+                    color: #856404;
+                    padding: 15px;
+                    border-radius: 5px;
+                    margin: 15px 0;
+                    text-align: center;
+                `;
+                reminder.innerHTML = `
+                    <strong>📅 Please Schedule Your Call First</strong><br>
+                    To proceed, please schedule your 15-minute discovery call using the calendar above.
+                `;
+                
+                const form = document.getElementById('contactForm');
+                form.parentNode.insertBefore(reminder, form);
+                
+                // Remove reminder after 5 seconds
+                setTimeout(() => {
+                    if (reminder.parentNode) {
+                        reminder.parentNode.removeChild(reminder);
+                    }
+                }, 5000);
+                
+                return false;
+            }
+            
+            console.log('✅ Form submission allowed');
+            
+            // Allow normal form submission (will open Google Forms in new tab)
+            return true;
+        });
+    }
+});
+
