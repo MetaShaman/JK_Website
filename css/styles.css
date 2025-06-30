@@ -1612,3 +1612,44 @@ a:focus {
     color: #28a745;
 }
 
+/* Submission success styling */
+.submission-success {
+    text-align: center;
+    padding: 60px 20px;
+    background: linear-gradient(135deg, #e8f5e8 0%, #f8f9fa 100%);
+    border-radius: 12px;
+    border: 2px solid #2d5a27;
+    margin: 20px 0;
+}
+
+.success-content {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.success-content i {
+    font-size: 4rem;
+    color: #28a745;
+    margin-bottom: 20px;
+}
+
+.success-content h2 {
+    color: #2d5a27;
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.success-content p {
+    color: #495057;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+.success-content p:last-child {
+    margin-bottom: 0;
+    font-weight: 500;
+    color: #2d5a27;
+}
+
