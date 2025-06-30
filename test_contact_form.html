@@ -53,16 +53,16 @@
             <h2>Send Me a Message</h2>
             <form id="contactForm" action="https://docs.google.com/forms/d/e/1FAIpQLSf76wgQZ6fUxB7f2Zt1Ppjw1hlQcoKqmk4Yn0O2R5Qmy9UHJA/formResponse" method="POST" target="_blank">
                 <div class="form-group">
+                    <label for="email">Email *</label>
+                    <input type="email" id="email" name="emailAddress" required>
+                </div>
+                <div class="form-group">
                     <label for="landLove">What is one thing that you love about your land?</label>
                     <input type="text" id="landLove" name="entry.428724634" placeholder="Tell me about your favorite aspect of your land">
                 </div>
                 <div class="form-group">
                     <label for="name">Full Name *</label>
                     <input type="text" id="name" name="entry.641543091" required>
-                </div>
-                <div class="form-group">
-                    <label for="email">Email Address *</label>
-                    <input type="email" id="email" name="emailAddress" required>
                 </div>
                 <div class="form-group">
                     <label for="phone">Phone Number</label>
@@ -146,16 +146,17 @@
                     <label class="form-label-required">Consultation Preference *</label>
                     <div class="radio-group">
                         <label class="radio-option">
-                            <input type="radio" name="consultationType" value="discovery_call" required>
+                            <input type="radio" name="consultation_type" value="discovery_call" required>
                             <span class="radio-custom"></span>
                             Schedule a 15 minute discovery call
                         </label>
                         <label class="radio-option">
-                            <input type="radio" name="consultationType" value="email_only" required>
+                            <input type="radio" name="consultation_type" value="email_only" required>
                             <span class="radio-custom"></span>
                             Not ready to book a call now
                         </label>
                     </div>
+                    <small class="form-help-text">💡 Discovery calls help us better understand your specific needs and provide tailored recommendations.</small>
                 </div>
                 
                 <!-- Calendly Widget Container (hidden by default) -->
@@ -178,11 +179,10 @@
                             </div>
                         </div>
                     </div>
-                    <div class="calendly-inline-widget" data-url="https://calendly.com/joonkim_schedule/land-stewardship-discovery-call?prefill[email]=&prefill[name]=&prefill[first_name]=&prefill[last_name]=&prefill[phone]=&prefill[location]=&prefill[note]=" style="min-width:320px;height:700px;"></div>
+                    <div id="calendly-widget" class="calendly-inline-widget" style="min-width:320px;height:700px;"></div>
                     <div id="call-scheduled-status" class="call-status" style="display: none;">
                         <div class="status-success">
-                            <i class="fas fa-check-circle"></i>
-                            <span>✅ Discovery call scheduled successfully!</span>
+                            <!-- Success message will be inserted here -->
                         </div>
                     </div>
                 </div>
@@ -191,19 +191,20 @@
                 <input type="hidden" id="call-scheduled" name="callScheduled" value="false">
                 
                 <!-- Hidden fields for Calendly booking data -->
-                <input type="hidden" id="appointment-booked" name="entry.905794834" value="No">
-                <input type="hidden" id="appointment-type" name="entry.1099853613" value="">
-                <input type="hidden" id="appointment-date" name="entry.507706455" value="">
-                <input type="hidden" id="appointment-time" name="entry.836387002" value="">
-                <input type="hidden" id="appointment-info" name="entry.1480507405" value="">
+                <input type="hidden" id="booked" name="entry.905794834" value="No">
+                <input type="hidden" id="appointmentType" name="entry.1099853613" value="">
+                <input type="hidden" id="dateTime" name="entry.507706455" value="">
+                <input type="hidden" id="info" name="entry.1480507405" value="">
                 
                 <button type="submit" class="btn btn-primary">Send Message</button>
             </form>
         </div>
     </div>
 
-    <!-- Calendly Integration -->
-    <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
+    <!-- External JavaScript -->
+    <script src="js/script.js"></script>
+    
+    <!-- Test-specific JavaScript -->
     <script>
         // Demo data
         const demoData = {
@@ -256,30 +257,29 @@
 
         function testEmailOnly() {
             populateDemoData();
-            document.querySelector('input[name="consultationType"][value="email_only"]').checked = true;
+            document.querySelector('input[name="consultation_type"][value="email_only"]').checked = true;
             document.getElementById('calendly-container').style.display = 'none';
             console.log('📧 Email-only flow ready for testing!');
         }
 
         function testCallScheduling() {
             populateDemoData();
-            document.querySelector('input[name="consultationType"][value="discovery_call"]').checked = true;
+            document.querySelector('input[name="consultation_type"][value="discovery_call"]').checked = true;
             document.getElementById('calendly-container').style.display = 'block';
             console.log('📅 Call scheduling flow ready for testing!');
         }
 
         function simulateCallScheduled() {
             populateDemoData();
-            document.querySelector('input[name="consultationType"][value="discovery_call"]').checked = true;
+            document.querySelector('input[name="consultation_type"][value="discovery_call"]').checked = true;
             document.getElementById('calendly-container').style.display = 'block';
             
             // Simulate call being scheduled
             document.getElementById('call-scheduled').value = 'true';
-            document.getElementById('appointment-booked').value = 'Yes';
-            document.getElementById('appointment-type').value = 'Land Stewardship Discovery Call';
-            document.getElementById('appointment-date').value = 'Monday, January 15, 2024';
-            document.getElementById('appointment-time').value = '2:00 PM PST';
-            document.getElementById('appointment-info').value = 'Event: Land Stewardship Discovery Call | Duration: 15 minutes | Location: Video Call';
+            document.getElementById('booked').value = 'Yes';
+            document.getElementById('appointmentType').value = 'Land Stewardship Discovery Call';
+            document.getElementById('dateTime').value = 'Monday, January 15, 2024 at 2:00 PM PST';
+            document.getElementById('info').value = 'Event: Land Stewardship Discovery Call | Duration: 15 minutes | Location: Video Call';
             
             document.getElementById('call-scheduled-status').style.display = 'block';
             console.log('✅ Call scheduled simulation complete!');
@@ -287,7 +287,7 @@
 
         function testDirectSubmission() {
             populateDemoData();
-            document.querySelector('input[name="consultationType"][value="email_only"]').checked = true;
+            document.querySelector('input[name="consultation_type"][value="email_only"]').checked = true;
             
             // Temporarily remove the submit event listener
             const form = document.getElementById('contactForm');
@@ -313,253 +313,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             populateDemoData();
             console.log('📝 Demo data populated');
-            
-            // Start checking for Calendly
-            checkCalendlyLoaded();
         });
-
-        // Copy the JavaScript from contact.html here
-        document.addEventListener('DOMContentLoaded', function() {
-            const consultationTypeRadios = document.querySelectorAll('input[name="consultationType"]');
-            const calendlyContainer = document.getElementById('calendly-container');
-            const contactForm = document.getElementById('contactForm');
-            const callScheduledField = document.getElementById('call-scheduled');
-            const callScheduledStatus = document.getElementById('call-scheduled-status');
-            
-            // Function to handle radio button changes
-            function handleConsultationPreference() {
-                const selectedValue = document.querySelector('input[name="consultationType"]:checked')?.value;
-                
-                if (selectedValue === 'discovery_call') {
-                    calendlyContainer.style.display = 'block';
-                    // Reset call scheduled status when switching to call option
-                    callScheduledField.value = 'false';
-                    callScheduledStatus.style.display = 'none';
-                    // Smooth scroll to the Calendly widget
-                    calendlyContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                } else {
-                    calendlyContainer.style.display = 'none';
-                    callScheduledField.value = 'false';
-                    callScheduledStatus.style.display = 'none';
-                }
-            }
-            
-            // Add event listeners for radio buttons
-            consultationTypeRadios.forEach(radio => {
-                radio.addEventListener('change', handleConsultationPreference);
-            });
-            
-            // Function to set up Calendly event listener
-            function setupCalendlyListener() {
-                if (window.Calendly) {
-                    window.Calendly('onEventScheduled', function(e) {
-                        console.log('Call scheduled:', e);
-                        
-                        // Update hidden fields with booking data
-                        const appointmentBooked = document.getElementById('appointment-booked');
-                        const appointmentType = document.getElementById('appointment-type');
-                        const appointmentDate = document.getElementById('appointment-date');
-                        const appointmentTime = document.getElementById('appointment-time');
-                        const appointmentInfo = document.getElementById('appointment-info');
-                        
-                        if (appointmentBooked) appointmentBooked.value = 'Yes';
-                        if (appointmentType) appointmentType.value = 'Land Stewardship Discovery Call';
-                        
-                        // Extract date and time from the event
-                        if (e.data.payload && e.data.payload.event) {
-                            const event = e.data.payload.event;
-                            const startTime = new Date(event.start_time);
-                            
-                            if (appointmentDate) {
-                                appointmentDate.value = startTime.toLocaleDateString('en-US', {
-                                    weekday: 'long',
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric'
-                                });
-                            }
-                            
-                            if (appointmentTime) {
-                                appointmentTime.value = startTime.toLocaleTimeString('en-US', {
-                                    hour: 'numeric',
-                                    minute: '2-digit',
-                                    timeZoneName: 'short'
-                                });
-                            }
-                            
-                            if (appointmentInfo) {
-                                const info = [];
-                                if (event.name) info.push(`Event: ${event.name}`);
-                                if (event.duration) info.push(`Duration: ${event.duration} minutes`);
-                                if (event.location) info.push(`Location: ${event.location}`);
-                                appointmentInfo.value = info.join(' | ');
-                            }
-                        }
-                        
-                        callScheduledField.value = 'true';
-                        callScheduledStatus.style.display = 'block';
-                        callScheduledStatus.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    });
-                    console.log('✅ Calendly event listener set up successfully');
-                } else {
-                    // If Calendly isn't loaded yet, try again in a moment
-                    setTimeout(setupCalendlyListener, 100);
-                }
-            }
-            
-            // Start trying to set up Calendly listener
-            setupCalendlyListener();
-            
-            // Form submission validation
-            if (contactForm) {
-                contactForm.addEventListener('submit', function(e) {
-                    console.log('📝 Form submission started');
-                    
-                    const selectedValue = document.querySelector('input[name="consultationType"]:checked')?.value;
-                    const isSchedulingSelected = selectedValue === 'discovery_call';
-                    const isCallScheduled = callScheduledField.value === 'true';
-                    
-                    if (isSchedulingSelected && !isCallScheduled) {
-                        e.preventDefault();
-                        alert('⚠️ Please schedule your discovery call before submitting the form.\n\nYou selected to schedule a call, but no call has been scheduled yet. Please complete your booking in the calendar above, or change your preference to "Not ready to book a call now" if you prefer to communicate via email only.');
-                        calendlyContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        return false;
-                    }
-                    
-                    // Show confirmation dialog
-                    let confirmMessage = 'Ready to submit your information?';
-                    if (isSchedulingSelected && isCallScheduled) {
-                        confirmMessage = 'Perfect! You\'ve scheduled your discovery call and filled out the form. Ready to submit?\n\nClick OK to send your information, or Cancel to review.';
-                    }
-                    
-                    const shouldSubmit = confirm(confirmMessage);
-                    
-                    if (!shouldSubmit) {
-                        e.preventDefault();
-                        return false;
-                    }
-                    
-                    console.log('🚀 Form submission proceeding to Google Forms...');
-                    
-                    // Let the form submit normally to Google Forms in a new tab
-                    // The form will open in a new tab where the user can complete submission
-                    
-                    setTimeout(function() {
-                        showSubmissionSuccess();
-                    }, 2000); // Give time for the new tab to open
-                });
-            }
-            
-            // Function to show submission success
-            function showSubmissionSuccess() {
-                const contactFormContainer = document.querySelector('.contact-form');
-                const selectedValue = document.querySelector('input[name="consultationType"]:checked')?.value;
-                const isSchedulingSelected = selectedValue === 'discovery_call';
-                
-                let successMessage = `
-                    <div class="submission-success">
-                        <div class="success-content">
-                            <i class="fas fa-check-circle"></i>
-                            <h2>Thank You!</h2>
-                            <p>Your message has been sent successfully. I'll get back to you within 24 hours.</p>
-                        </div>
-                    </div>
-                `;
-                
-                if (isSchedulingSelected) {
-                    successMessage = `
-                        <div class="submission-success">
-                            <div class="success-content">
-                                <i class="fas fa-check-circle"></i>
-                                <h2>Thank You!</h2>
-                                <p>Your message has been sent and your discovery call has been scheduled. I'll send you a confirmation email with the call details.</p>
-                                <p>I look forward to discussing your land stewardship needs!</p>
-                            </div>
-                        </div>
-                    `;
-                }
-                
-                contactFormContainer.innerHTML = successMessage;
-            }
-        });
-
-        // Check if Calendly is loaded
-        function checkCalendlyLoaded() {
-            if (window.Calendly) {
-                console.log('✅ Calendly is loaded and ready');
-                initCalendlyListener();
-                return true;
-            } else {
-                console.log('⚠️ Calendly not loaded yet, retrying in 1 second...');
-                setTimeout(checkCalendlyLoaded, 1000);
-                return false;
-            }
-        }
-        
-        // Initialize Calendly event listener when ready
-        function initCalendlyListener() {
-            if (window.Calendly) {
-                window.Calendly('onEventScheduled', function(e) {
-                    console.log('🎉 Calendly event scheduled:', e);
-                    
-                    const appointmentBooked = document.getElementById('appointment-booked');
-                    const appointmentType = document.getElementById('appointment-type');
-                    const appointmentDate = document.getElementById('appointment-date');
-                    const appointmentTime = document.getElementById('appointment-time');
-                    const appointmentInfo = document.getElementById('appointment-info');
-                    
-                    if (appointmentBooked) {
-                        appointmentBooked.value = 'Yes';
-                        console.log('✅ Appointment booked set to Yes');
-                    }
-                    if (appointmentType) {
-                        appointmentType.value = 'Land Stewardship Discovery Call';
-                        console.log('✅ Appointment type set');
-                    }
-                    
-                    if (e.data.payload && e.data.payload.event) {
-                        const event = e.data.payload.event;
-                        const startTime = new Date(event.start_time);
-                        
-                        if (appointmentDate) {
-                            appointmentDate.value = startTime.toLocaleDateString('en-US', {
-                                weekday: 'long',
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
-                            });
-                            console.log('✅ Appointment date set:', appointmentDate.value);
-                        }
-                        
-                        if (appointmentTime) {
-                            appointmentTime.value = startTime.toLocaleTimeString('en-US', {
-                                hour: 'numeric',
-                                minute: '2-digit',
-                                timeZoneName: 'short'
-                            });
-                            console.log('✅ Appointment time set:', appointmentTime.value);
-                        }
-                        
-                        if (appointmentInfo) {
-                            const info = [];
-                            if (event.name) info.push(`Event: ${event.name}`);
-                            if (event.duration) info.push(`Duration: ${event.duration} minutes`);
-                            if (event.location) info.push(`Location: ${event.location}`);
-                            appointmentInfo.value = info.join(' | ');
-                            console.log('✅ Appointment info set:', appointmentInfo.value);
-                        }
-                    }
-                    
-                    callScheduledField.value = 'true';
-                    callScheduledStatus.style.display = 'block';
-                    callScheduledStatus.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    console.log('✅ Call scheduled field set to true');
-                });
-                console.log('✅ Calendly event listener initialized');
-            } else {
-                console.log('⚠️ Calendly not available for listener initialization');
-            }
-        }
     </script>
 </body>
 </html>
