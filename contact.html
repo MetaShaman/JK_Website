@@ -324,12 +324,52 @@
                         if (typeof window.Calendly === 'function') {
                             window.Calendly('onEventScheduled', function(e) {
                                 console.log('🎉 Call scheduled:', e);
-                                markCallAsScheduled();
+                                markCallAsScheduled(e);
                             });
                             console.log('✅ Calendly event listener set up (function)');
                         } else if (window.Calendly.initInlineWidget) {
                             // Calendly loaded as object, try different approach
                             console.log('✅ Calendly loaded as object, using alternative setup');
+                            
+                            // Set up iframe message listener for Calendly events
+                            window.addEventListener('message', function(event) {
+                                if (event.origin.includes('calendly.com')) {
+                                    console.log('📨 Received message from Calendly:', event.data);
+                                    if (event.data && event.data.type === 'calendly:event_scheduled') {
+                                        console.log('🎉 Calendly event scheduled via message:', event.data);
+                                        markCallAsScheduled(event.data);
+                                    }
+                                }
+                            });
+                            
+                            // Set up DOM monitoring for booking completion
+                            const calendlyContainer = document.querySelector('.calendly-inline-widget');
+                            if (calendlyContainer) {
+                                const observer = new MutationObserver(function(mutations) {
+                                    mutations.forEach(function(mutation) {
+                                        if (mutation.type === 'childList') {
+                                            mutation.addedNodes.forEach(function(node) {
+                                                if (node.nodeType === 1 && node.textContent) {
+                                                    if (node.textContent.includes('confirmed') || 
+                                                        node.textContent.includes('scheduled') || 
+                                                        node.textContent.includes('booked') ||
+                                                        node.textContent.includes('success')) {
+                                                        console.log('🎯 Detected booking completion in DOM:', node.textContent);
+                                                        markCallAsScheduled({ source: 'DOM detection' });
+                                                    }
+                                                }
+                                            });
+                                        }
+                                    });
+                                });
+                                
+                                observer.observe(calendlyContainer, {
+                                    childList: true,
+                                    subtree: true,
+                                    characterData: true
+                                });
+                                console.log('👁️ DOM observer set up for Calendly container');
+                            }
                         }
                     } catch (error) {
                         console.error('❌ Error setting up Calendly listener:', error);
@@ -345,8 +385,8 @@
         }
         
         // Simple function to mark call as scheduled
-        function markCallAsScheduled() {
-            console.log('✅ Marking call as scheduled');
+        function markCallAsScheduled(eventData) {
+            console.log('✅ Marking call as scheduled with data:', eventData);
             
             // Update hidden fields
             const appointmentBooked = document.getElementById('appointment-booked');
@@ -359,9 +399,43 @@
             
             if (appointmentBooked) appointmentBooked.value = 'Yes';
             if (appointmentType) appointmentType.value = 'Land Stewardship Discovery Call';
-            if (appointmentDate) appointmentDate.value = 'Scheduled via Calendly';
-            if (appointmentTime) appointmentTime.value = 'Scheduled via Calendly';
-            if (appointmentInfo) appointmentInfo.value = 'Land Stewardship Discovery Call - Scheduled via Calendly';
+            
+            // Try to extract date and time from event data
+            let extractedDate = 'Scheduled via Calendly';
+            let extractedTime = 'Scheduled via Calendly';
+            let extractedInfo = 'Land Stewardship Discovery Call - Scheduled via Calendly';
+            
+            if (eventData && eventData.data && eventData.data.payload && eventData.data.payload.event) {
+                const event = eventData.data.payload.event;
+                console.log('📅 Extracting event data:', event);
+                
+                if (event.start_time) {
+                    const startTime = new Date(event.start_time);
+                    extractedDate = startTime.toLocaleDateString('en-US', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+                    extractedTime = startTime.toLocaleTimeString('en-US', {
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        timeZoneName: 'short'
+                    });
+                    console.log('📅 Extracted date:', extractedDate);
+                    console.log('⏰ Extracted time:', extractedTime);
+                }
+                
+                if (event.name) {
+                    extractedInfo = `Event: ${event.name}`;
+                    if (event.duration) extractedInfo += ` | Duration: ${event.duration} minutes`;
+                    if (event.location) extractedInfo += ` | Location: ${event.location}`;
+                }
+            }
+            
+            if (appointmentDate) appointmentDate.value = extractedDate;
+            if (appointmentTime) appointmentTime.value = extractedTime;
+            if (appointmentInfo) appointmentInfo.value = extractedInfo;
             
             // Update form state
             if (callScheduledField) callScheduledField.value = 'true';
