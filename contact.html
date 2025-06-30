@@ -481,6 +481,92 @@
             }
         });
     </script>
+    
+    <!-- Additional Calendly setup for reliability -->
+    <script>
+        // Check if Calendly is loaded
+        function checkCalendlyLoaded() {
+            if (window.Calendly) {
+                console.log('✅ Calendly is loaded and ready');
+                initCalendlyListener();
+                return true;
+            } else {
+                console.log('⚠️ Calendly not loaded yet, retrying in 1 second...');
+                setTimeout(checkCalendlyLoaded, 1000);
+                return false;
+            }
+        }
+        
+        // Initialize Calendly event listener when ready
+        function initCalendlyListener() {
+            if (window.Calendly) {
+                window.Calendly('onEventScheduled', function(e) {
+                    console.log('🎉 Calendly event scheduled:', e);
+                    
+                    const appointmentBooked = document.getElementById('appointment-booked');
+                    const appointmentType = document.getElementById('appointment-type');
+                    const appointmentDate = document.getElementById('appointment-date');
+                    const appointmentTime = document.getElementById('appointment-time');
+                    const appointmentInfo = document.getElementById('appointment-info');
+                    const callScheduledField = document.getElementById('call-scheduled');
+                    const callScheduledStatus = document.getElementById('call-scheduled-status');
+                    
+                    if (appointmentBooked) {
+                        appointmentBooked.value = 'Yes';
+                        console.log('✅ Appointment booked set to Yes');
+                    }
+                    if (appointmentType) {
+                        appointmentType.value = 'Land Stewardship Discovery Call';
+                        console.log('✅ Appointment type set');
+                    }
+                    
+                    if (e.data.payload && e.data.payload.event) {
+                        const event = e.data.payload.event;
+                        const startTime = new Date(event.start_time);
+                        
+                        if (appointmentDate) {
+                            appointmentDate.value = startTime.toLocaleDateString('en-US', {
+                                weekday: 'long',
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                            });
+                            console.log('✅ Appointment date set:', appointmentDate.value);
+                        }
+                        
+                        if (appointmentTime) {
+                            appointmentTime.value = startTime.toLocaleTimeString('en-US', {
+                                hour: 'numeric',
+                                minute: '2-digit',
+                                timeZoneName: 'short'
+                            });
+                            console.log('✅ Appointment time set:', appointmentTime.value);
+                        }
+                        
+                        if (appointmentInfo) {
+                            const info = [];
+                            if (event.name) info.push(`Event: ${event.name}`);
+                            if (event.duration) info.push(`Duration: ${event.duration} minutes`);
+                            if (event.location) info.push(`Location: ${event.location}`);
+                            appointmentInfo.value = info.join(' | ');
+                            console.log('✅ Appointment info set:', appointmentInfo.value);
+                        }
+                    }
+                    
+                    callScheduledField.value = 'true';
+                    callScheduledStatus.style.display = 'block';
+                    callScheduledStatus.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    console.log('✅ Call scheduled field set to true');
+                });
+                console.log('✅ Calendly event listener initialized');
+            } else {
+                console.log('⚠️ Calendly not available for listener initialization');
+            }
+        }
+        
+        // Start checking for Calendly
+        checkCalendlyLoaded();
+    </script>
 </body>
 </html>
 
