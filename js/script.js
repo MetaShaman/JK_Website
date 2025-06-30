@@ -599,14 +599,15 @@ function initializeCalendly() {
         if (window.Calendly && typeof window.Calendly.initInlineWidget === 'function') {
             clearInterval(checkCalendly);
             
-            const calendlyContainer = document.getElementById('calendly-container');
-            if (calendlyContainer) {
+            const calendlyWidget = document.getElementById('calendly-widget');
+            if (calendlyWidget) {
                 window.Calendly.initInlineWidget({
-                    url: 'https://calendly.com/joonkim/land-stewardship-discovery-call',
-                    parentElement: calendlyContainer,
+                    url: 'https://calendly.com/joonkim_schedule/land-stewardship-discovery-call',
+                    parentElement: calendlyWidget,
                     prefill: {},
                     utm: {}
                 });
+                console.log('✅ Calendly widget initialized for main contact form');
             }
         }
     }, 100);
@@ -763,6 +764,37 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize Calendly if we're on the contact page
     if (document.getElementById('calendly-container')) {
         initializeCalendly();
+        
+        // Set up radio button handling for consultation preference
+        const consultationTypeRadios = document.querySelectorAll('input[name="consultation_type"]');
+        const calendlyContainer = document.getElementById('calendly-container');
+        
+        function handleConsultationPreference() {
+            const selectedValue = document.querySelector('input[name="consultation_type"]:checked')?.value;
+            
+            if (selectedValue === 'discovery_call') {
+                calendlyContainer.style.display = 'block';
+                // Reset call scheduled status when switching to call option
+                window.callScheduled = false;
+                const callScheduledStatus = document.getElementById('call-scheduled-status');
+                if (callScheduledStatus) callScheduledStatus.style.display = 'none';
+                // Smooth scroll to the Calendly widget
+                calendlyContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+                calendlyContainer.style.display = 'none';
+                window.callScheduled = false;
+                const callScheduledStatus = document.getElementById('call-scheduled-status');
+                if (callScheduledStatus) callScheduledStatus.style.display = 'none';
+            }
+        }
+        
+        // Add event listeners for radio buttons
+        consultationTypeRadios.forEach(radio => {
+            radio.addEventListener('change', handleConsultationPreference);
+        });
+        
+        // Check initial state
+        handleConsultationPreference();
     }
     
     // Form submission handler for contact form
