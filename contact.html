@@ -249,6 +249,7 @@
                         
                         <!-- Debug button for testing -->
                         <button type="button" class="btn btn-secondary" style="margin-left: 10px; font-size: 12px;" onclick="simulateCallScheduled()">Test: Simulate Call Scheduled</button>
+                        <button type="button" class="btn btn-secondary" style="margin-left: 10px; font-size: 12px;" onclick="testCalendlyListener()">Test: Check Calendly</button>
                     </form>
                 </div>
             </div>
@@ -322,55 +323,68 @@
             // Function to set up Calendly event listener
             function setupCalendlyListener() {
                 if (window.Calendly) {
-                    window.Calendly('onEventScheduled', function(e) {
-                        console.log('Call scheduled:', e);
-                        
-                        // Update hidden fields with booking data
-                        const appointmentBooked = document.getElementById('appointment-booked');
-                        const appointmentType = document.getElementById('appointment-type');
-                        const appointmentDate = document.getElementById('appointment-date');
-                        const appointmentTime = document.getElementById('appointment-time');
-                        const appointmentInfo = document.getElementById('appointment-info');
-                        
-                        if (appointmentBooked) appointmentBooked.value = 'Yes';
-                        if (appointmentType) appointmentType.value = 'Land Stewardship Discovery Call';
-                        
-                        // Extract date and time from the event
-                        if (e.data.payload && e.data.payload.event) {
-                            const event = e.data.payload.event;
-                            const startTime = new Date(event.start_time);
+                    // Wait a bit more for the widget to be fully initialized
+                    setTimeout(function() {
+                        window.Calendly('onEventScheduled', function(e) {
+                            console.log('🎉 Calendly event scheduled:', e);
                             
-                            if (appointmentDate) {
-                                appointmentDate.value = startTime.toLocaleDateString('en-US', {
-                                    weekday: 'long',
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric'
-                                });
+                            // Update hidden fields with booking data
+                            const appointmentBooked = document.getElementById('appointment-booked');
+                            const appointmentType = document.getElementById('appointment-type');
+                            const appointmentDate = document.getElementById('appointment-date');
+                            const appointmentTime = document.getElementById('appointment-time');
+                            const appointmentInfo = document.getElementById('appointment-info');
+                            
+                            if (appointmentBooked) {
+                                appointmentBooked.value = 'Yes';
+                                console.log('✅ Appointment booked set to Yes');
+                            }
+                            if (appointmentType) {
+                                appointmentType.value = 'Land Stewardship Discovery Call';
+                                console.log('✅ Appointment type set');
                             }
                             
-                            if (appointmentTime) {
-                                appointmentTime.value = startTime.toLocaleTimeString('en-US', {
-                                    hour: 'numeric',
-                                    minute: '2-digit',
-                                    timeZoneName: 'short'
-                                });
+                            // Extract date and time from the event
+                            if (e.data.payload && e.data.payload.event) {
+                                const event = e.data.payload.event;
+                                const startTime = new Date(event.start_time);
+                                
+                                if (appointmentDate) {
+                                    appointmentDate.value = startTime.toLocaleDateString('en-US', {
+                                        weekday: 'long',
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric'
+                                    });
+                                    console.log('✅ Appointment date set:', appointmentDate.value);
+                                }
+                                
+                                if (appointmentTime) {
+                                    appointmentTime.value = startTime.toLocaleTimeString('en-US', {
+                                        hour: 'numeric',
+                                        minute: '2-digit',
+                                        timeZoneName: 'short'
+                                    });
+                                    console.log('✅ Appointment time set:', appointmentTime.value);
+                                }
+                                
+                                if (appointmentInfo) {
+                                    const info = [];
+                                    if (event.name) info.push(`Event: ${event.name}`);
+                                    if (event.duration) info.push(`Duration: ${event.duration} minutes`);
+                                    if (event.location) info.push(`Location: ${event.location}`);
+                                    appointmentInfo.value = info.join(' | ');
+                                    console.log('✅ Appointment info set:', appointmentInfo.value);
+                                }
                             }
                             
-                            if (appointmentInfo) {
-                                const info = [];
-                                if (event.name) info.push(`Event: ${event.name}`);
-                                if (event.duration) info.push(`Duration: ${event.duration} minutes`);
-                                if (event.location) info.push(`Location: ${event.location}`);
-                                appointmentInfo.value = info.join(' | ');
-                            }
-                        }
-                        
-                        callScheduledField.value = 'true';
-                        callScheduledStatus.style.display = 'block';
-                        callScheduledStatus.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    });
-                    console.log('✅ Calendly event listener set up successfully');
+                            callScheduledField.value = 'true';
+                            callScheduledStatus.style.display = 'block';
+                            callScheduledStatus.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            console.log('✅ Call scheduled field set to true');
+                        });
+                        console.log('✅ Calendly event listener set up successfully');
+                    }, 2000); // Wait 2 seconds for widget to be fully loaded
                 } else {
                     // If Calendly isn't loaded yet, try again in a moment
                     setTimeout(setupCalendlyListener, 100);
@@ -399,6 +413,32 @@
                 document.getElementById('appointment-info').value = 'Event: Land Stewardship Discovery Call | Duration: 15 minutes | Location: Video Call';
                 callScheduledStatus.style.display = 'block';
                 console.log('✅ Call scheduled simulation complete!');
+            };
+            
+            // Function to test Calendly event listener
+            window.testCalendlyListener = function() {
+                console.log('🧪 Testing Calendly event listener...');
+                if (window.Calendly) {
+                    console.log('✅ Calendly is available');
+                    // Try to manually trigger the event listener
+                    const testEvent = {
+                        data: {
+                            payload: {
+                                event: {
+                                    name: 'Test Event',
+                                    start_time: new Date().toISOString(),
+                                    duration: 15,
+                                    location: 'Video Call'
+                                }
+                            }
+                        }
+                    };
+                    console.log('🎯 Manually triggering Calendly event...');
+                    // This won't actually trigger the listener, but it helps us debug
+                    console.log('Test event data:', testEvent);
+                } else {
+                    console.log('❌ Calendly is not available');
+                }
             };
             
             // Form submission validation
