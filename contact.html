@@ -298,6 +298,9 @@
     
     <!-- Contact Form JavaScript -->
     <script>
+        // Global variable to track Calendly initialization
+        window.calendlyInitialized = false;
+        
         // Mobile Navigation Toggle
         document.addEventListener('DOMContentLoaded', function() {
             const mobileMenu = document.getElementById('mobile-menu');
@@ -331,23 +334,38 @@
 
         // Initialize Calendly when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize Calendly widget
-            const checkCalendly = setInterval(() => {
+            // Initialize Calendly widget with better error handling
+            const initializeCalendly = () => {
+                const calendlyWidget = document.getElementById('calendly-widget');
+                if (!calendlyWidget) {
+                    console.log('⏳ Calendly widget element not found, retrying...');
+                    setTimeout(initializeCalendly, 100);
+                    return;
+                }
+                
                 if (window.Calendly && typeof window.Calendly.initInlineWidget === 'function') {
-                    clearInterval(checkCalendly);
-                    
-                    const calendlyWidget = document.getElementById('calendly-widget');
-                    if (calendlyWidget) {
+                    try {
                         window.Calendly.initInlineWidget({
                             url: 'https://calendly.com/joonkim_schedule/land-stewardship-discovery-call',
                             parentElement: calendlyWidget,
                             prefill: {},
                             utm: {}
                         });
-                        console.log('✅ Calendly widget initialized');
+                        console.log('✅ Calendly widget initialized successfully');
+                        window.calendlyInitialized = true;
+                    } catch (error) {
+                        console.error('❌ Error initializing Calendly widget:', error);
+                        // Retry after a short delay
+                        setTimeout(initializeCalendly, 200);
                     }
+                } else {
+                    console.log('⏳ Calendly script not ready, retrying...');
+                    setTimeout(initializeCalendly, 100);
                 }
-            }, 100);
+            };
+            
+            // Start initialization process
+            initializeCalendly();
 
             // Set up radio button handling for consultation preference
             const consultationTypeRadios = document.querySelectorAll('input[name="consultation_type"]');
@@ -362,8 +380,16 @@
                     window.callScheduled = false;
                     const callScheduledStatus = document.getElementById('call-scheduled-status');
                     if (callScheduledStatus) callScheduledStatus.style.display = 'none';
+                    
+                    // Ensure Calendly is initialized when showing the container
+                    if (!window.calendlyInitialized) {
+                        setTimeout(initializeCalendly, 100);
+                    }
+                    
                     // Smooth scroll to the Calendly widget
-                    calendlyContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    setTimeout(() => {
+                        calendlyContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 200);
                 } else {
                     calendlyContainer.style.display = 'none';
                     window.callScheduled = false;
