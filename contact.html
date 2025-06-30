@@ -134,27 +134,22 @@
                             <div class="checkbox-group">
                                 <label class="checkbox-label">
                                     <input type="checkbox" name="entry.911095196" value="Structural Repairs & Maintenance">
-                                    <span class="checkmark"></span>
                                     Structural Repairs & Maintenance
                                 </label>
                                 <label class="checkbox-label">
                                     <input type="checkbox" name="entry.911095196" value="Landscape & Garden Projects">
-                                    <span class="checkmark"></span>
                                     Landscape & Garden Projects
                                 </label>
                                 <label class="checkbox-label">
                                     <input type="checkbox" name="entry.911095196" value="Design Support & Implementation">
-                                    <span class="checkmark"></span>
                                     Design Support & Implementation
                                 </label>
                                 <label class="checkbox-label">
                                     <input type="checkbox" name="entry.911095196" value="Project Tracking & Oversight">
-                                    <span class="checkmark"></span>
                                     Project Tracking & Oversight
                                 </label>
                                 <label class="checkbox-label">
                                     <input type="checkbox" name="entry.911095196" value="Regulatory Compliance & Permitting">
-                                    <span class="checkmark"></span>
                                     Regulatory Compliance & Permitting
                                 </label>
                             </div>
@@ -238,7 +233,16 @@
                                 </div>
                             </div>
                             <div class="calendly-inline-widget" data-url="https://calendly.com/joonkim_schedule/land-stewardship-discovery-call" style="min-width:320px;height:700px;"></div>
+                            <div id="call-scheduled-status" class="call-status" style="display: none;">
+                                <div class="status-success">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>✅ Discovery call scheduled successfully!</span>
+                                </div>
+                            </div>
                         </div>
+                        
+                        <!-- Hidden field to track call scheduling -->
+                        <input type="hidden" id="call-scheduled" name="callScheduled" value="false">
                         
                         <button type="submit" class="btn btn-primary">Send Message</button>
                     </form>
@@ -289,15 +293,22 @@
             const notReadyRadio = document.getElementById('not-ready');
             const calendlyContainer = document.getElementById('calendly-container');
             const contactForm = document.getElementById('contact-form');
+            const callScheduledField = document.getElementById('call-scheduled');
+            const callScheduledStatus = document.getElementById('call-scheduled-status');
             
             // Function to handle radio button changes
             function handleConsultationPreference() {
                 if (scheduleCallRadio && scheduleCallRadio.checked) {
                     calendlyContainer.style.display = 'block';
+                    // Reset call scheduled status when switching to call option
+                    callScheduledField.value = 'false';
+                    callScheduledStatus.style.display = 'none';
                     // Smooth scroll to the Calendly widget
                     calendlyContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 } else {
                     calendlyContainer.style.display = 'none';
+                    callScheduledField.value = 'false';
+                    callScheduledStatus.style.display = 'none';
                 }
             }
             
@@ -309,19 +320,37 @@
                 notReadyRadio.addEventListener('change', handleConsultationPreference);
             }
             
-            // Form submission enhancement
+            // Listen for Calendly booking events
+            if (window.Calendly) {
+                window.Calendly('onEventScheduled', function(e) {
+                    console.log('Call scheduled:', e);
+                    callScheduledField.value = 'true';
+                    callScheduledStatus.style.display = 'block';
+                    callScheduledStatus.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                });
+            }
+            
+            // Form submission validation
             if (contactForm) {
                 contactForm.addEventListener('submit', function(e) {
                     const isSchedulingSelected = scheduleCallRadio && scheduleCallRadio.checked;
+                    const isCallScheduled = callScheduledField.value === 'true';
                     
-                    if (isSchedulingSelected) {
-                        // Show a friendly reminder to complete both actions
-                        const reminder = confirm('Great! You\'ve chosen to schedule a 15-minute discovery call. Please make sure you\'ve:\n\n1. ✅ Filled out the form above\n2. 📅 Scheduled your discovery call\n3. 📤 Submitted this form\n\nClick OK to continue with form submission, or Cancel to review your information.');
+                    if (isSchedulingSelected && !isCallScheduled) {
+                        e.preventDefault();
+                        alert('⚠️ Please schedule your discovery call before submitting the form.\n\nYou selected to schedule a call, but no call has been scheduled yet. Please complete your booking in the calendar above, then try submitting again.');
+                        calendlyContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        return false;
+                    }
+                    
+                    if (isSchedulingSelected && isCallScheduled) {
+                        // Show confirmation for scheduled calls
+                        const reminder = confirm('Perfect! You\'ve scheduled your discovery call and filled out the form. Ready to submit?\n\nClick OK to send your information, or Cancel to review.');
                         
                         if (!reminder) {
                             e.preventDefault();
-                            // Scroll back to the form
                             contactForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            return false;
                         }
                     }
                 });

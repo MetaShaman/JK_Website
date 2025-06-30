@@ -1586,3 +1586,29 @@ a:focus {
     background-color: #e8f5e8;
 }
 
+/* Call scheduled status styling */
+.call-status {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.status-success {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    padding: 12px;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+.status-success i {
+    font-size: 1.2rem;
+    color: #28a745;
+}
+
