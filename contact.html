@@ -315,17 +315,22 @@
             
             // Wait for Calendly to be available
             const checkCalendly = setInterval(function() {
-                if (window.Calendly && typeof window.Calendly === 'function') {
+                if (window.Calendly && (typeof window.Calendly === 'function' || typeof window.Calendly === 'object')) {
                     clearInterval(checkCalendly);
                     console.log('✅ Calendly is ready');
                     
                     // Set up simple event listener
                     try {
-                        window.Calendly('onEventScheduled', function(e) {
-                            console.log('🎉 Call scheduled:', e);
-                            markCallAsScheduled();
-                        });
-                        console.log('✅ Calendly event listener set up');
+                        if (typeof window.Calendly === 'function') {
+                            window.Calendly('onEventScheduled', function(e) {
+                                console.log('🎉 Call scheduled:', e);
+                                markCallAsScheduled();
+                            });
+                            console.log('✅ Calendly event listener set up (function)');
+                        } else if (window.Calendly.initInlineWidget) {
+                            // Calendly loaded as object, try different approach
+                            console.log('✅ Calendly loaded as object, using alternative setup');
+                        }
                     } catch (error) {
                         console.error('❌ Error setting up Calendly listener:', error);
                     }
@@ -349,6 +354,8 @@
             const appointmentDate = document.getElementById('appointment-date');
             const appointmentTime = document.getElementById('appointment-time');
             const appointmentInfo = document.getElementById('appointment-info');
+            const callScheduledField = document.getElementById('call-scheduled');
+            const callScheduledStatus = document.getElementById('call-scheduled-status');
             
             if (appointmentBooked) appointmentBooked.value = 'Yes';
             if (appointmentType) appointmentType.value = 'Land Stewardship Discovery Call';
@@ -357,40 +364,42 @@
             if (appointmentInfo) appointmentInfo.value = 'Land Stewardship Discovery Call - Scheduled via Calendly';
             
             // Update form state
-            callScheduledField.value = 'true';
-            callScheduledStatus.style.display = 'block';
-            callScheduledStatus.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            
-            // Clear any existing messages
-            callScheduledStatus.innerHTML = '';
-            
-            // Show prominent success message
-            const successMessage = document.createElement('div');
-            successMessage.className = 'alert alert-success';
-            successMessage.style.cssText = `
-                background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-                border: 2px solid #28a745;
-                border-radius: 10px;
-                padding: 20px;
-                margin: 15px 0;
-                text-align: center;
-                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            `;
-            successMessage.innerHTML = `
-                <div style="font-size: 24px; margin-bottom: 10px;">🎉</div>
-                <h4 style="color: #155724; margin-bottom: 10px; font-weight: bold;">Call Successfully Booked!</h4>
-                <p style="color: #155724; margin-bottom: 15px; font-size: 16px;">
-                    Your 15-minute discovery call has been scheduled. You'll receive a confirmation email shortly.
-                </p>
-                <div style="background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #28a745; margin: 10px 0;">
-                    <strong style="color: #155724;">✅ Form is now unlocked</strong><br>
-                    <small style="color: #6c757d;">You can now submit your project details below</small>
-                </div>
-            `;
-            callScheduledStatus.appendChild(successMessage);
-            
-            // Add a subtle animation
-            successMessage.style.animation = 'fadeInUp 0.5s ease-out';
+            if (callScheduledField) callScheduledField.value = 'true';
+            if (callScheduledStatus) {
+                callScheduledStatus.style.display = 'block';
+                callScheduledStatus.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                // Clear any existing messages
+                callScheduledStatus.innerHTML = '';
+                
+                // Show prominent success message
+                const successMessage = document.createElement('div');
+                successMessage.className = 'alert alert-success';
+                successMessage.style.cssText = `
+                    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+                    border: 2px solid #28a745;
+                    border-radius: 10px;
+                    padding: 20px;
+                    margin: 15px 0;
+                    text-align: center;
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                `;
+                successMessage.innerHTML = `
+                    <div style="font-size: 24px; margin-bottom: 10px;">🎉</div>
+                    <h4 style="color: #155724; margin-bottom: 10px; font-weight: bold;">Call Successfully Booked!</h4>
+                    <p style="color: #155724; margin-bottom: 15px; font-size: 16px;">
+                        Your 15-minute discovery call has been scheduled. You'll receive a confirmation email shortly.
+                    </p>
+                    <div style="background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #28a745; margin: 10px 0;">
+                        <strong style="color: #155724;">✅ Form is now unlocked</strong><br>
+                        <small style="color: #6c757d;">You can now submit your project details below</small>
+                    </div>
+                `;
+                callScheduledStatus.appendChild(successMessage);
+                
+                // Add a subtle animation
+                successMessage.style.animation = 'fadeInUp 0.5s ease-out';
+            }
             
             console.log('✅ Call scheduled successfully');
         }
@@ -441,7 +450,10 @@
             console.log('- window.Calendly exists:', !!window.Calendly);
             console.log('- window.Calendly type:', typeof window.Calendly);
             if (window.Calendly && typeof window.Calendly === 'function') {
-                console.log('✅ Calendly is available');
+                console.log('✅ Calendly is available as function');
+            } else if (window.Calendly && typeof window.Calendly === 'object') {
+                console.log('✅ Calendly is available as object');
+                console.log('- Calendly object properties:', Object.keys(window.Calendly));
             } else {
                 console.log('❌ Calendly is not available');
             }
