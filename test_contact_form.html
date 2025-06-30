@@ -44,6 +44,7 @@
             <button onclick="clearForm()">🗑️ Clear Form</button>
             <button onclick="testEmailOnly()">📧 Test Email-Only</button>
             <button onclick="testCallScheduling()">📅 Test Call Scheduling</button>
+            <button onclick="simulateCallScheduled()">🎯 Simulate Call Scheduled</button>
         </div>
 
         <!-- Copy the entire contact form from contact.html here -->
@@ -274,10 +275,41 @@
             console.log('📅 Call scheduling flow ready for testing!');
         }
 
+        function simulateCallScheduled() {
+            populateDemoData();
+            document.getElementById('schedule-call').checked = true;
+            document.getElementById('calendly-container').style.display = 'block';
+            
+            // Manually trigger the call scheduled state
+            const callScheduledField = document.getElementById('call-scheduled');
+            const callScheduledStatus = document.getElementById('call-scheduled-status');
+            
+            callScheduledField.value = 'true';
+            callScheduledStatus.style.display = 'block';
+            
+            // Populate appointment fields
+            const appointmentBooked = document.getElementById('appointment-booked');
+            const appointmentType = document.getElementById('appointment-type');
+            const appointmentDate = document.getElementById('appointment-date');
+            const appointmentTime = document.getElementById('appointment-time');
+            const appointmentInfo = document.getElementById('appointment-info');
+            
+            if (appointmentBooked) appointmentBooked.value = 'Yes';
+            if (appointmentType) appointmentType.value = 'Land Stewardship Discovery Call';
+            if (appointmentDate) appointmentDate.value = 'Monday, July 1, 2024';
+            if (appointmentTime) appointmentTime.value = '2:00 PM PDT';
+            if (appointmentInfo) appointmentInfo.value = 'Event: Land Stewardship Discovery Call | Duration: 15 minutes | Location: Zoom';
+            
+            console.log('🎯 Simulated call scheduled - all fields populated');
+        }
+
         // Auto-populate on page load
         document.addEventListener('DOMContentLoaded', function() {
             populateDemoData();
-            console.log('🚀 Test page loaded with demo data!');
+            console.log('📝 Demo data populated');
+            
+            // Start checking for Calendly
+            checkCalendlyLoaded();
         });
 
         // Copy the JavaScript from contact.html here
@@ -309,62 +341,25 @@
                 notReadyRadio.addEventListener('change', handleConsultationPreference);
             }
             
-            if (window.Calendly) {
-                window.Calendly('onEventScheduled', function(e) {
-                    console.log('Call scheduled:', e);
-                    
-                    const appointmentBooked = document.getElementById('appointment-booked');
-                    const appointmentType = document.getElementById('appointment-type');
-                    const appointmentDate = document.getElementById('appointment-date');
-                    const appointmentTime = document.getElementById('appointment-time');
-                    const appointmentInfo = document.getElementById('appointment-info');
-                    
-                    if (appointmentBooked) appointmentBooked.value = 'Yes';
-                    if (appointmentType) appointmentType.value = 'Land Stewardship Discovery Call';
-                    
-                    if (e.data.payload && e.data.payload.event) {
-                        const event = e.data.payload.event;
-                        const startTime = new Date(event.start_time);
-                        
-                        if (appointmentDate) {
-                            appointmentDate.value = startTime.toLocaleDateString('en-US', {
-                                weekday: 'long',
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
-                            });
-                        }
-                        
-                        if (appointmentTime) {
-                            appointmentTime.value = startTime.toLocaleTimeString('en-US', {
-                                hour: 'numeric',
-                                minute: '2-digit',
-                                timeZoneName: 'short'
-                            });
-                        }
-                        
-                        if (appointmentInfo) {
-                            const info = [];
-                            if (event.name) info.push(`Event: ${event.name}`);
-                            if (event.duration) info.push(`Duration: ${event.duration} minutes`);
-                            if (event.location) info.push(`Location: ${event.location}`);
-                            appointmentInfo.value = info.join(' | ');
-                        }
-                    }
-                    
-                    callScheduledField.value = 'true';
-                    callScheduledStatus.style.display = 'block';
-                    callScheduledStatus.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                });
-            }
+            // Initialize Calendly listener when ready
+            checkCalendlyLoaded();
             
             if (contactForm) {
                 contactForm.addEventListener('submit', function(e) {
+                    console.log('📝 Form submission started');
+                    
                     const isSchedulingSelected = scheduleCallRadio && scheduleCallRadio.checked;
                     const isCallScheduled = callScheduledField.value === 'true';
                     
+                    console.log('📊 Form state:', {
+                        isSchedulingSelected: isSchedulingSelected,
+                        isCallScheduled: isCallScheduled,
+                        callScheduledFieldValue: callScheduledField.value
+                    });
+                    
                     if (isSchedulingSelected && !isCallScheduled) {
                         e.preventDefault();
+                        console.log('❌ Form submission blocked - call not scheduled');
                         alert('⚠️ Please schedule your discovery call before submitting the form.\n\nYou selected to schedule a call, but no call has been scheduled yet. Please complete your booking in the calendar above, then try submitting again.');
                         calendlyContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
                         return false;
@@ -376,12 +371,15 @@
                     }
                     
                     const shouldSubmit = confirm(confirmMessage);
+                    console.log('✅ User confirmed submission:', shouldSubmit);
                     
                     if (!shouldSubmit) {
                         e.preventDefault();
+                        console.log('❌ User cancelled submission');
                         return false;
                     }
                     
+                    console.log('🚀 Form submission proceeding to Google Forms...');
                     setTimeout(function() {
                         showSubmissionSuccess();
                     }, 1000);
@@ -418,6 +416,84 @@
                 contactFormContainer.innerHTML = successMessage;
             }
         });
+
+        // Check if Calendly is loaded
+        function checkCalendlyLoaded() {
+            if (window.Calendly) {
+                console.log('✅ Calendly is loaded and ready');
+                initCalendlyListener();
+                return true;
+            } else {
+                console.log('⚠️ Calendly not loaded yet, retrying in 1 second...');
+                setTimeout(checkCalendlyLoaded, 1000);
+                return false;
+            }
+        }
+        
+        // Initialize Calendly event listener when ready
+        function initCalendlyListener() {
+            if (window.Calendly) {
+                window.Calendly('onEventScheduled', function(e) {
+                    console.log('🎉 Calendly event scheduled:', e);
+                    
+                    const appointmentBooked = document.getElementById('appointment-booked');
+                    const appointmentType = document.getElementById('appointment-type');
+                    const appointmentDate = document.getElementById('appointment-date');
+                    const appointmentTime = document.getElementById('appointment-time');
+                    const appointmentInfo = document.getElementById('appointment-info');
+                    
+                    if (appointmentBooked) {
+                        appointmentBooked.value = 'Yes';
+                        console.log('✅ Appointment booked set to Yes');
+                    }
+                    if (appointmentType) {
+                        appointmentType.value = 'Land Stewardship Discovery Call';
+                        console.log('✅ Appointment type set');
+                    }
+                    
+                    if (e.data.payload && e.data.payload.event) {
+                        const event = e.data.payload.event;
+                        const startTime = new Date(event.start_time);
+                        
+                        if (appointmentDate) {
+                            appointmentDate.value = startTime.toLocaleDateString('en-US', {
+                                weekday: 'long',
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                            });
+                            console.log('✅ Appointment date set:', appointmentDate.value);
+                        }
+                        
+                        if (appointmentTime) {
+                            appointmentTime.value = startTime.toLocaleTimeString('en-US', {
+                                hour: 'numeric',
+                                minute: '2-digit',
+                                timeZoneName: 'short'
+                            });
+                            console.log('✅ Appointment time set:', appointmentTime.value);
+                        }
+                        
+                        if (appointmentInfo) {
+                            const info = [];
+                            if (event.name) info.push(`Event: ${event.name}`);
+                            if (event.duration) info.push(`Duration: ${event.duration} minutes`);
+                            if (event.location) info.push(`Location: ${event.location}`);
+                            appointmentInfo.value = info.join(' | ');
+                            console.log('✅ Appointment info set:', appointmentInfo.value);
+                        }
+                    }
+                    
+                    callScheduledField.value = 'true';
+                    callScheduledStatus.style.display = 'block';
+                    callScheduledStatus.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    console.log('✅ Call scheduled field set to true');
+                });
+                console.log('✅ Calendly event listener initialized');
+            } else {
+                console.log('⚠️ Calendly not available for listener initialization');
+            }
+        }
     </script>
 </body>
 </html>
