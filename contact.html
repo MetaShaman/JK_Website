@@ -335,7 +335,8 @@
                 console.log('- window.Calendly exists:', !!window.Calendly);
                 console.log('- window.Calendly type:', typeof window.Calendly);
                 
-                if (window.Calendly && typeof window.Calendly === 'function') {
+                // More robust check for Calendly readiness
+                if (window.Calendly && typeof window.Calendly === 'function' && window.Calendly.initInlineWidget) {
                     console.log('✅ Calendly is ready, setting up listeners...');
                     // Wait a bit more for the widget to be fully initialized
                     setTimeout(function() {
@@ -421,17 +422,31 @@
                             console.log('✅ Calendly event listener set up successfully');
                         } catch (error) {
                             console.error('❌ Error setting up Calendly listeners:', error);
+                            // Retry after a delay
+                            setTimeout(setupCalendlyListenerWithRetry, 1000);
                         }
-                    }, 2000); // Wait 2 seconds for widget to be fully loaded
+                    }, 3000); // Wait 3 seconds for widget to be fully loaded
                 } else {
                     // If Calendly isn't loaded yet or isn't a function, try again in a moment
                     console.log('⏳ Waiting for Calendly to be ready... (exists:', !!window.Calendly, ', is function:', typeof window.Calendly === 'function', ')');
-                    setTimeout(setupCalendlyListener, 500);
+                    setTimeout(setupCalendlyListenerWithRetry, 1000);
                 }
             }
             
             // Start trying to set up Calendly listener
-            setupCalendlyListener();
+            let retryCount = 0;
+            const maxRetries = 10;
+            
+            function setupCalendlyListenerWithRetry() {
+                if (retryCount >= maxRetries) {
+                    console.log('❌ Max retries reached for Calendly setup. Using manual booking only.');
+                    return;
+                }
+                retryCount++;
+                setupCalendlyListener();
+            }
+            
+            setupCalendlyListenerWithRetry();
             
             // Test Calendly loading
             setTimeout(function() {
