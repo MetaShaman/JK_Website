@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Google Form Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .result { margin-top: 20px; padding: 10px; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+    <h1>🔬 Simple Google Form Test</h1>
+    
+    <p>This is a minimal test with just the essential fields to see if the form submission works.</p>
+    
+    <form id="simpleForm" action="https://docs.google.com/forms/d/e/1FAIpQLSf76wgQZ6fUxB7f2Zt1Ppjw1hlQcoKqmk4Yn0O2R5Qmy9UHJA/formResponse" method="POST" target="hidden_iframe">
+        <div class="form-group">
+            <label for="email">Email Address *</label>
+            <input type="email" id="email" name="emailAddress" value="test@example.com" required>
+        </div>
+        <div class="form-group">
+            <label for="name">Full Name *</label>
+            <input type="text" id="name" name="entry.641543091" value="Test User" required>
+        </div>
+        <div class="form-group">
+            <label for="message">Message *</label>
+            <textarea id="message" name="entry.771214362" rows="3" required>This is a test message from simple form - timestamp: 2024-06-29 20:30:00</textarea>
+        </div>
+        <button type="submit">Submit to Google Forms</button>
+    </form>
+
+    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;" onload="console.log('📨 Form submitted to Google Forms!'); document.getElementById('result').innerHTML='<div class=success>✅ Form submitted successfully! Check your Google Sheets.</div>';"></iframe>
+    
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('simpleForm').addEventListener('submit', function(e) {
+            console.log('🚀 Simple form submission started');
+            console.log('📊 Form action:', this.action);
+            console.log('📊 Form method:', this.method);
+            console.log('📊 Form target:', this.target);
+            
+            // Let the form submit normally
+            console.log('📝 Allowing form to submit to Google Forms...');
+        });
+    </script>
+</body>
+</html> 
