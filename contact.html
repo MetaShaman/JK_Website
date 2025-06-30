@@ -322,7 +322,7 @@
             
             // Function to set up Calendly event listener
             function setupCalendlyListener() {
-                if (window.Calendly) {
+                if (window.Calendly && typeof window.Calendly === 'function') {
                     // Wait a bit more for the widget to be fully initialized
                     setTimeout(function() {
                         window.Calendly('onEventScheduled', function(e) {
@@ -386,8 +386,9 @@
                         console.log('✅ Calendly event listener set up successfully');
                     }, 2000); // Wait 2 seconds for widget to be fully loaded
                 } else {
-                    // If Calendly isn't loaded yet, try again in a moment
-                    setTimeout(setupCalendlyListener, 100);
+                    // If Calendly isn't loaded yet or isn't a function, try again in a moment
+                    console.log('⏳ Waiting for Calendly to be ready... (exists:', !!window.Calendly, ', is function:', typeof window.Calendly === 'function', ')');
+                    setTimeout(setupCalendlyListener, 500);
                 }
             }
             
@@ -398,6 +399,8 @@
             setTimeout(function() {
                 console.log('🔍 Calendly loading check:');
                 console.log('- window.Calendly exists:', !!window.Calendly);
+                console.log('- window.Calendly type:', typeof window.Calendly);
+                console.log('- window.Calendly is function:', typeof window.Calendly === 'function');
                 console.log('- Calendly widget element:', document.querySelector('.calendly-inline-widget'));
                 console.log('- Calendly container visible:', calendlyContainer.style.display !== 'none');
             }, 3000);
@@ -418,8 +421,11 @@
             // Function to test Calendly event listener
             window.testCalendlyListener = function() {
                 console.log('🧪 Testing Calendly event listener...');
-                if (window.Calendly) {
-                    console.log('✅ Calendly is available');
+                console.log('- window.Calendly exists:', !!window.Calendly);
+                console.log('- window.Calendly is function:', typeof window.Calendly === 'function');
+                
+                if (window.Calendly && typeof window.Calendly === 'function') {
+                    console.log('✅ Calendly is available and ready');
                     // Try to manually trigger the event listener
                     const testEvent = {
                         data: {
@@ -437,7 +443,9 @@
                     // This won't actually trigger the listener, but it helps us debug
                     console.log('Test event data:', testEvent);
                 } else {
-                    console.log('❌ Calendly is not available');
+                    console.log('❌ Calendly is not available or not ready');
+                    console.log('  - Exists:', !!window.Calendly);
+                    console.log('  - Type:', typeof window.Calendly);
                 }
             };
             
