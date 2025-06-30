@@ -318,57 +318,66 @@
                 radio.addEventListener('change', handleConsultationPreference);
             });
             
-            // Listen for Calendly booking events
-            if (window.Calendly) {
-                window.Calendly('onEventScheduled', function(e) {
-                    console.log('Call scheduled:', e);
-                    
-                    // Update hidden fields with booking data
-                    const appointmentBooked = document.getElementById('appointment-booked');
-                    const appointmentType = document.getElementById('appointment-type');
-                    const appointmentDate = document.getElementById('appointment-date');
-                    const appointmentTime = document.getElementById('appointment-time');
-                    const appointmentInfo = document.getElementById('appointment-info');
-                    
-                    if (appointmentBooked) appointmentBooked.value = 'Yes';
-                    if (appointmentType) appointmentType.value = 'Land Stewardship Discovery Call';
-                    
-                    // Extract date and time from the event
-                    if (e.data.payload && e.data.payload.event) {
-                        const event = e.data.payload.event;
-                        const startTime = new Date(event.start_time);
+            // Function to set up Calendly event listener
+            function setupCalendlyListener() {
+                if (window.Calendly) {
+                    window.Calendly('onEventScheduled', function(e) {
+                        console.log('Call scheduled:', e);
                         
-                        if (appointmentDate) {
-                            appointmentDate.value = startTime.toLocaleDateString('en-US', {
-                                weekday: 'long',
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
-                            });
+                        // Update hidden fields with booking data
+                        const appointmentBooked = document.getElementById('appointment-booked');
+                        const appointmentType = document.getElementById('appointment-type');
+                        const appointmentDate = document.getElementById('appointment-date');
+                        const appointmentTime = document.getElementById('appointment-time');
+                        const appointmentInfo = document.getElementById('appointment-info');
+                        
+                        if (appointmentBooked) appointmentBooked.value = 'Yes';
+                        if (appointmentType) appointmentType.value = 'Land Stewardship Discovery Call';
+                        
+                        // Extract date and time from the event
+                        if (e.data.payload && e.data.payload.event) {
+                            const event = e.data.payload.event;
+                            const startTime = new Date(event.start_time);
+                            
+                            if (appointmentDate) {
+                                appointmentDate.value = startTime.toLocaleDateString('en-US', {
+                                    weekday: 'long',
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric'
+                                });
+                            }
+                            
+                            if (appointmentTime) {
+                                appointmentTime.value = startTime.toLocaleTimeString('en-US', {
+                                    hour: 'numeric',
+                                    minute: '2-digit',
+                                    timeZoneName: 'short'
+                                });
+                            }
+                            
+                            if (appointmentInfo) {
+                                const info = [];
+                                if (event.name) info.push(`Event: ${event.name}`);
+                                if (event.duration) info.push(`Duration: ${event.duration} minutes`);
+                                if (event.location) info.push(`Location: ${event.location}`);
+                                appointmentInfo.value = info.join(' | ');
+                            }
                         }
                         
-                        if (appointmentTime) {
-                            appointmentTime.value = startTime.toLocaleTimeString('en-US', {
-                                hour: 'numeric',
-                                minute: '2-digit',
-                                timeZoneName: 'short'
-                            });
-                        }
-                        
-                        if (appointmentInfo) {
-                            const info = [];
-                            if (event.name) info.push(`Event: ${event.name}`);
-                            if (event.duration) info.push(`Duration: ${event.duration} minutes`);
-                            if (event.location) info.push(`Location: ${event.location}`);
-                            appointmentInfo.value = info.join(' | ');
-                        }
-                    }
-                    
-                    callScheduledField.value = 'true';
-                    callScheduledStatus.style.display = 'block';
-                    callScheduledStatus.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                });
+                        callScheduledField.value = 'true';
+                        callScheduledStatus.style.display = 'block';
+                        callScheduledStatus.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    });
+                    console.log('✅ Calendly event listener set up successfully');
+                } else {
+                    // If Calendly isn't loaded yet, try again in a moment
+                    setTimeout(setupCalendlyListener, 100);
+                }
             }
+            
+            // Start trying to set up Calendly listener
+            setupCalendlyListener();
             
             // Form submission validation
             if (contactForm) {
