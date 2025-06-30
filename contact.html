@@ -335,6 +335,7 @@
             // Function to mark call as scheduled and update form fields
             function markCallAsScheduled(eventData) {
                 console.log('🎯 Marking call as scheduled with data:', eventData);
+                console.log('📊 Full event data structure:', JSON.stringify(eventData, null, 2));
                 
                 // Update hidden fields with booking data
                 const appointmentBooked = document.getElementById('appointment-booked');
@@ -352,11 +353,47 @@
                     console.log('✅ Appointment type set');
                 }
                 
-                // Extract date and time from the event if available
+                // Try multiple ways to extract date and time from the event
+                let startTime = null;
+                let eventDetails = null;
+                
+                // Method 1: Standard Calendly event structure
                 if (eventData && eventData.data && eventData.data.payload && eventData.data.payload.event) {
-                    const event = eventData.data.payload.event;
-                    const startTime = new Date(event.start_time);
-                    
+                    eventDetails = eventData.data.payload.event;
+                    console.log('📅 Found event details in data.payload.event:', eventDetails);
+                }
+                // Method 2: Direct event structure
+                else if (eventData && eventData.payload && eventData.payload.event) {
+                    eventDetails = eventData.payload.event;
+                    console.log('📅 Found event details in payload.event:', eventDetails);
+                }
+                // Method 3: Direct event data
+                else if (eventData && eventData.event) {
+                    eventDetails = eventData.event;
+                    console.log('📅 Found event details in event:', eventDetails);
+                }
+                // Method 4: Check for start_time directly
+                else if (eventData && eventData.start_time) {
+                    startTime = new Date(eventData.start_time);
+                    console.log('📅 Found start_time directly:', startTime);
+                }
+                
+                // Extract start time from event details
+                if (eventDetails) {
+                    if (eventDetails.start_time) {
+                        startTime = new Date(eventDetails.start_time);
+                        console.log('📅 Extracted start_time from event details:', startTime);
+                    } else if (eventDetails.startTime) {
+                        startTime = new Date(eventDetails.startTime);
+                        console.log('📅 Extracted startTime from event details:', startTime);
+                    } else if (eventDetails.date) {
+                        startTime = new Date(eventDetails.date);
+                        console.log('📅 Extracted date from event details:', startTime);
+                    }
+                }
+                
+                // Set date and time if we found them
+                if (startTime && !isNaN(startTime.getTime())) {
                     if (appointmentDate) {
                         appointmentDate.value = startTime.toLocaleDateString('en-US', {
                             weekday: 'long',
@@ -375,20 +412,32 @@
                         });
                         console.log('✅ Appointment time set:', appointmentTime.value);
                     }
-                    
-                    if (appointmentInfo) {
-                        const info = [];
-                        if (event.name) info.push(`Event: ${event.name}`);
-                        if (event.duration) info.push(`Duration: ${event.duration} minutes`);
-                        if (event.location) info.push(`Location: ${event.location}`);
-                        appointmentInfo.value = info.join(' | ');
-                        console.log('✅ Appointment info set:', appointmentInfo.value);
-                    }
                 } else {
-                    // Set default values if no event data
-                    if (appointmentDate) appointmentDate.value = 'Scheduled via Calendly';
-                    if (appointmentTime) appointmentTime.value = 'Scheduled via Calendly';
-                    if (appointmentInfo) appointmentInfo.value = 'Land Stewardship Discovery Call - Scheduled via Calendly';
+                    // Set default values if no date/time found
+                    if (appointmentDate) {
+                        appointmentDate.value = 'Scheduled via Calendly';
+                        console.log('⚠️ No date found, using default');
+                    }
+                    if (appointmentTime) {
+                        appointmentTime.value = 'Scheduled via Calendly';
+                        console.log('⚠️ No time found, using default');
+                    }
+                }
+                
+                // Set appointment info
+                if (appointmentInfo) {
+                    const info = [];
+                    if (eventDetails) {
+                        if (eventDetails.name) info.push(`Event: ${eventDetails.name}`);
+                        if (eventDetails.duration) info.push(`Duration: ${eventDetails.duration} minutes`);
+                        if (eventDetails.location) info.push(`Location: ${eventDetails.location}`);
+                        if (eventDetails.description) info.push(`Description: ${eventDetails.description}`);
+                    }
+                    if (info.length === 0) {
+                        info.push('Land Stewardship Discovery Call - Scheduled via Calendly');
+                    }
+                    appointmentInfo.value = info.join(' | ');
+                    console.log('✅ Appointment info set:', appointmentInfo.value);
                 }
                 
                 callScheduledField.value = 'true';
@@ -448,6 +497,28 @@
                                 console.log('👀 Calendly event type viewed:', e);
                             });
                             
+                            // Try to listen for ALL possible Calendly events
+                            try {
+                                // Listen for any Calendly events using a more generic approach
+                                if (window.Calendly && typeof window.Calendly === 'function') {
+                                    // Try to hook into the Calendly function itself
+                                    const originalCalendly = window.Calendly;
+                                    window.Calendly = function(eventType, callback) {
+                                        console.log('🎯 Calendly event listener registered:', eventType);
+                                        return originalCalendly.call(this, eventType, function(e) {
+                                            console.log('🎯 Calendly event fired:', eventType, e);
+                                            if (eventType === 'onEventScheduled' || eventType === 'onDateAndTimeSelected') {
+                                                markCallAsScheduled(e);
+                                            }
+                                            return callback(e);
+                                        });
+                                    };
+                                    console.log('✅ Calendly function hooked for event monitoring');
+                                }
+                            } catch (error) {
+                                console.error('❌ Error hooking Calendly function:', error);
+                            }
+                            
                             // Listen for any Calendly events
                             if (window.Calendly.EVENT_TYPES) {
                                 console.log('📋 Available Calendly event types:', window.Calendly.EVENT_TYPES);
@@ -500,6 +571,66 @@
                                     }
                                 }
                             });
+                            
+                            // Monitor URL changes in the Calendly iframe
+                            const calendlyIframe = document.querySelector('.calendly-inline-widget iframe');
+                            if (calendlyIframe) {
+                                console.log('🔍 Found Calendly iframe, monitoring for changes...');
+                                
+                                // Check iframe URL periodically
+                                const checkIframeUrl = setInterval(function() {
+                                    try {
+                                        const currentUrl = calendlyIframe.src;
+                                        if (currentUrl && (
+                                            currentUrl.includes('confirmed') ||
+                                            currentUrl.includes('success') ||
+                                            currentUrl.includes('thank') ||
+                                            currentUrl.includes('complete')
+                                        )) {
+                                            console.log('🎯 Detected booking completion via iframe URL:', currentUrl);
+                                            markCallAsScheduled({ source: 'iframe URL change', url: currentUrl });
+                                            clearInterval(checkIframeUrl);
+                                        }
+                                    } catch (error) {
+                                        // Cross-origin restrictions might prevent access
+                                        console.log('⚠️ Cannot access iframe URL due to CORS');
+                                    }
+                                }, 2000); // Check every 2 seconds
+                                
+                                // Stop checking after 5 minutes
+                                setTimeout(function() {
+                                    clearInterval(checkIframeUrl);
+                                    console.log('⏰ Stopped monitoring iframe URL changes');
+                                }, 300000);
+                            }
+                            
+                            // Add a fallback: check for booking completion every 5 seconds
+                            const bookingCheckInterval = setInterval(function() {
+                                const calendlyContainer = document.querySelector('.calendly-inline-widget');
+                                if (calendlyContainer) {
+                                    const successElements = calendlyContainer.querySelectorAll('*');
+                                    successElements.forEach(function(element) {
+                                        if (element.textContent && (
+                                            element.textContent.includes('confirmed') ||
+                                            element.textContent.includes('scheduled') ||
+                                            element.textContent.includes('booked') ||
+                                            element.textContent.includes('appointment') ||
+                                            element.textContent.includes('success') ||
+                                            element.textContent.includes('thank you')
+                                        )) {
+                                            console.log('🎯 Detected booking completion via text content:', element.textContent);
+                                            markCallAsScheduled({ source: 'text content detection', text: element.textContent });
+                                            clearInterval(bookingCheckInterval);
+                                        }
+                                    });
+                                }
+                            }, 5000); // Check every 5 seconds
+                            
+                            // Stop checking after 10 minutes
+                            setTimeout(function() {
+                                clearInterval(bookingCheckInterval);
+                                console.log('⏰ Stopped periodic booking completion checks');
+                            }, 600000);
                             
                             console.log('✅ Calendly event listener set up successfully');
                         } catch (error) {
