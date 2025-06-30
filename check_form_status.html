@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check Google Form Status</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .test-section { margin-bottom: 30px; padding: 20px; border: 1px solid #ddd; border-radius: 4px; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        .result { margin-top: 10px; padding: 10px; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Google Form Status Check</h1>
+    
+    <div class="test-section">
+        <h3>Current Form Information:</h3>
+        <p><strong>Form URL:</strong> <code>https://docs.google.com/forms/d/e/1FAIpQLSf76wgQZ6fUxB7f2Zt1Ppjw1hlQcoKqmk4Yn0O2R5Qmy9UHJA/formResponse</code></p>
+        <p><strong>Form ID:</strong> <code>1FAIpQLSf76wgQZ6fUxB7f2Zt1Ppjw1hlQcoKqmk4Yn0O2R5Qmy9UHJA</code></p>
+        <button onclick="testFormAccess()">🔗 Test Form Access</button>
+        <button onclick="openFormInNewTab()">📋 Open Form in New Tab</button>
+        <div id="accessResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Manual Form Test:</h3>
+        <p>Try submitting this form manually to see if it works:</p>
+        <form id="manualForm" action="https://docs.google.com/forms/d/e/1FAIpQLSf76wgQZ6fUxB7f2Zt1Ppjw1hlQcoKqmk4Yn0O2R5Qmy9UHJA/formResponse" method="POST" target="_blank">
+            <p><label>Email: <input type="email" name="emailAddress" value="test@example.com" required></label></p>
+            <p><label>Name: <input type="text" name="entry.641543091" value="Test User" required></label></p>
+            <p><label>Message: <textarea name="entry.771214362" required>Test message from status check</textarea></label></p>
+            <button type="submit">Submit (Opens in New Tab)</button>
+        </form>
+    </div>
+
+    <div class="test-section">
+        <h3>Alternative Form URL Test:</h3>
+        <p>Let's try the form without the "e/" prefix:</p>
+        <form id="altForm" action="https://docs.google.com/forms/d/1FAIpQLSf76wgQZ6fUxB7f2Zt1Ppjw1hlQcoKqmk4Yn0O2R5Qmy9UHJA/formResponse" method="POST" target="_blank">
+            <p><label>Email: <input type="email" name="emailAddress" value="test@example.com" required></label></p>
+            <p><label>Name: <input type="text" name="entry.641543091" value="Test User" required></label></p>
+            <p><label>Message: <textarea name="entry.771214362" required>Test message from alt URL</textarea></label></p>
+            <button type="submit">Submit (Alternative URL)</button>
+        </form>
+    </div>
+
+    <div class="test-section">
+        <h3>Check Form Settings:</h3>
+        <p>Please check these in your Google Form:</p>
+        <ol>
+            <li>Open your Google Form in edit mode</li>
+            <li>Go to "Responses" tab</li>
+            <li>Make sure "Accepting responses" is turned ON</li>
+            <li>Check if the Google Sheets link is still connected</li>
+            <li>Try submitting the form manually in the form editor</li>
+        </ol>
+        <button onclick="openFormEditor()">📝 Open Form Editor</button>
+    </div>
+
+    <script>
+        function testFormAccess() {
+            const resultDiv = document.getElementById('accessResult');
+            resultDiv.innerHTML = '<div class="info">Testing form access...</div>';
+            
+            // Try to fetch the form page
+            fetch('https://docs.google.com/forms/d/e/1FAIpQLSf76wgQZ6fUxB7f2Zt1Ppjw1hlQcoKqmk4Yn0O2R5Qmy9UHJA/viewform')
+                .then(response => {
+                    if (response.ok) {
+                        resultDiv.innerHTML = '<div class="success">✅ Form URL is accessible! Status: ' + response.status + '</div>';
+                    } else {
+                        resultDiv.innerHTML = '<div class="error">❌ Form URL returned error: ' + response.status + '</div>';
+                    }
+                })
+                .catch(error => {
+                    resultDiv.innerHTML = '<div class="error">❌ Error accessing form: ' + error.message + '</div>';
+                });
+        }
+
+        function openFormInNewTab() {
+            window.open('https://docs.google.com/forms/d/e/1FAIpQLSf76wgQZ6fUxB7f2Zt1Ppjw1hlQcoKqmk4Yn0O2R5Qmy9UHJA/viewform', '_blank');
+        }
+
+        function openFormEditor() {
+            window.open('https://docs.google.com/forms/d/1FAIpQLSf76wgQZ6fUxB7f2Zt1Ppjw1hlQcoKqmk4Yn0O2R5Qmy9UHJA/edit', '_blank');
+        }
+
+        // Auto-run tests on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔍 Status check page loaded');
+            setTimeout(testFormAccess, 1000);
+        });
+    </script>
+</body>
+</html> 
