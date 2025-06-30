@@ -378,7 +378,7 @@
             
             // Method 1: Listen for Calendly events on the document
             document.addEventListener('calendly:event_scheduled', function(e) {
-                console.log('🎉 Calendly event scheduled:', e.detail);
+                console.log('🎉 Calendly event scheduled (Method 1):', e.detail);
                 handleCallScheduled(e.detail);
             });
             
@@ -390,12 +390,25 @@
                 console.log('👤 Calendly profile viewed:', e.detail);
             });
             
-            // Method 2: Listen for iframe messages
+            // Method 2: Listen for iframe messages (this was working!)
             window.addEventListener('message', function(e) {
+                console.log('📨 Message received:', e.data);
+                
+                // Check for Calendly events in various formats
+                if (e.data && e.data.event) {
+                    console.log('📨 Event detected:', e.data.event);
+                    
+                    if (e.data.event === 'calendly:event_scheduled' || e.data.event === 'calendly.event_scheduled') {
+                        console.log('🎉 Calendly event scheduled (Method 2):', e.data);
+                        handleCallScheduled(e.data.payload || e.data);
+                    }
+                }
+                
+                // Also check for Calendly events in the data structure
                 if (e.data && e.data.event && e.data.event.indexOf('calendly') !== -1) {
-                    console.log('📨 Calendly message received:', e.data);
-                    if (e.data.event === 'calendly:event_scheduled') {
-                        handleCallScheduled(e.data.payload);
+                    console.log('📨 Calendly message received (Method 2):', e.data);
+                    if (e.data.event === 'calendly:event_scheduled' || e.data.event === 'calendly.event_scheduled') {
+                        handleCallScheduled(e.data.payload || e.data);
                     }
                 }
             });
@@ -423,6 +436,24 @@
             
             // Method 4: Monitor form fields for changes (fallback)
             monitorCallScheduledField();
+            
+            // Method 5: Set up additional listeners after a delay to ensure widget is ready
+            setTimeout(function() {
+                console.log('⏰ Setting up delayed Calendly listeners...');
+                
+                // Try to access Calendly API directly
+                if (window.Calendly && typeof window.Calendly === 'function') {
+                    try {
+                        window.Calendly('onEventScheduled', function(e) {
+                            console.log('🎉 Calendly event scheduled (Method 5 - API):', e);
+                            handleCallScheduled(e);
+                        });
+                        console.log('✅ Calendly API listener set up');
+                    } catch (error) {
+                        console.error('❌ Error setting up Calendly API listener:', error);
+                    }
+                }
+            }, 2000);
         }
 
         // Handle call scheduled event
