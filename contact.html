@@ -238,6 +238,24 @@
                                         <span>Submit the form to send your information</span>
                                     </div>
                                 </div>
+                                
+                                <!-- Test button for debugging -->
+                                <div style="margin: 15px 0; padding: 10px; background: #f8f9fa; border-radius: 5px; border: 1px solid #dee2e6;">
+                                    <p style="margin: 0 0 10px 0; font-size: 14px; color: #6c757d;">
+                                        <strong>🧪 Debug Tools:</strong> Test the booking detection
+                                    </p>
+                                    <button type="button" onclick="simulateCallScheduled()" style="
+                                        background: #007bff; 
+                                        color: white; 
+                                        border: none; 
+                                        padding: 8px 16px; 
+                                        border-radius: 4px; 
+                                        cursor: pointer; 
+                                        font-size: 14px;
+                                    ">
+                                        Test Simulate Call Booking
+                                    </button>
+                                </div>
                             </div>
                             <div id="calendly-widget" class="calendly-inline-widget" style="min-width:320px;height:700px;"></div>
                             <div id="call-scheduled-status" class="call-status" style="display: none;">
@@ -463,6 +481,60 @@
                         console.log('👤 Invitee ID extracted:', inviteeId);
                         bookingData.info += ` | Invitee ID: ${inviteeId}`;
                     }
+                    
+                    // Extract appointment date and time
+                    if (payload.invitee && payload.invitee.start_time) {
+                        const startTime = new Date(payload.invitee.start_time);
+                        const endTime = payload.invitee.end_time ? new Date(payload.invitee.end_time) : null;
+                        
+                        // Format the date and time
+                        const dateOptions = { 
+                            weekday: 'long', 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric' 
+                        };
+                        const timeOptions = { 
+                            hour: 'numeric', 
+                            minute: '2-digit', 
+                            timeZoneName: 'short' 
+                        };
+                        
+                        const formattedDate = startTime.toLocaleDateString('en-US', dateOptions);
+                        const formattedStartTime = startTime.toLocaleTimeString('en-US', timeOptions);
+                        const formattedEndTime = endTime ? endTime.toLocaleTimeString('en-US', timeOptions) : '';
+                        
+                        bookingData.dateTime = `${formattedDate} at ${formattedStartTime}`;
+                        if (formattedEndTime) {
+                            bookingData.dateTime += ` - ${formattedEndTime}`;
+                        }
+                        
+                        console.log('📅 Appointment date/time extracted:', bookingData.dateTime);
+                    }
+                    
+                    // Extract additional booking information
+                    if (payload.invitee) {
+                        const invitee = payload.invitee;
+                        let additionalInfo = [];
+                        
+                        if (invitee.name) {
+                            additionalInfo.push(`Name: ${invitee.name}`);
+                        }
+                        if (invitee.email) {
+                            additionalInfo.push(`Email: ${invitee.email}`);
+                        }
+                        if (invitee.questions_and_answers && invitee.questions_and_answers.length > 0) {
+                            invitee.questions_and_answers.forEach(qa => {
+                                if (qa.question && qa.answer) {
+                                    additionalInfo.push(`${qa.question}: ${qa.answer}`);
+                                }
+                            });
+                        }
+                        
+                        if (additionalInfo.length > 0) {
+                            bookingData.info += ` | ${additionalInfo.join(' | ')}`;
+                        }
+                    }
                 }
             } catch (error) {
                 console.error('❌ Error extracting booking details:', error);
@@ -522,6 +594,15 @@
         // Test function to simulate call scheduling (for debugging)
         function simulateCallScheduled() {
             console.log('🧪 Simulating call scheduled...');
+            
+            // Create a realistic future appointment time (next day at 2 PM)
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(14, 0, 0, 0); // 2 PM
+            
+            const endTime = new Date(tomorrow);
+            endTime.setMinutes(endTime.getMinutes() + 15); // 15 minutes later
+            
             const mockDetails = {
                 event: 'calendly.event_scheduled',
                 payload: {
@@ -529,7 +610,17 @@
                         uri: 'https://api.calendly.com/scheduled_events/test-event-id'
                     },
                     invitee: {
-                        uri: 'https://api.calendly.com/scheduled_events/test-event-id/invitees/test-invitee-id'
+                        uri: 'https://api.calendly.com/scheduled_events/test-event-id/invitees/test-invitee-id',
+                        start_time: tomorrow.toISOString(),
+                        end_time: endTime.toISOString(),
+                        name: 'Test User',
+                        email: 'test@example.com',
+                        questions_and_answers: [
+                            {
+                                question: 'What is your primary land stewardship goal?',
+                                answer: 'Test answer for debugging'
+                            }
+                        ]
                     }
                 }
             };
