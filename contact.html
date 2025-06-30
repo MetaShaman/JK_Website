@@ -423,12 +423,51 @@
             console.log('🎉 Call scheduled with details:', details);
             callScheduled = true;
             
+            // Extract booking information from Calendly event data
+            let bookingData = {
+                booked: 'Yes',
+                appointmentType: 'Land Stewardship Discovery Call',
+                dateTime: 'Scheduled via Calendly',
+                info: 'Discovery call booked via Calendly'
+            };
+            
+            // Try to extract more detailed information from the event data
+            if (details && details.payload) {
+                console.log('📅 Extracting booking details from payload:', details.payload);
+                
+                // If we have event URI, we can extract the event ID
+                if (details.payload.event && details.payload.event.uri) {
+                    const eventUri = details.payload.event.uri;
+                    const eventId = eventUri.split('/').pop();
+                    bookingData.info = `Event ID: ${eventId} | Booked via Calendly`;
+                    console.log('🎫 Event ID extracted:', eventId);
+                }
+                
+                // If we have invitee URI, we can extract the invitee ID
+                if (details.payload.invitee && details.payload.invitee.uri) {
+                    const inviteeUri = details.payload.invitee.uri;
+                    const inviteeId = inviteeUri.split('/').pop();
+                    bookingData.info += ` | Invitee ID: ${inviteeId}`;
+                    console.log('👤 Invitee ID extracted:', inviteeId);
+                }
+            }
+            
             // Update hidden fields with booking information
-            if (details) {
-                document.getElementById('entry_booking_booked').value = 'Yes';
-                document.getElementById('entry_booking_appointment_type').value = 'Discovery Call';
-                document.getElementById('entry_booking_date_time').value = details.startTime || 'Scheduled';
-                document.getElementById('entry_booking_info').value = JSON.stringify(details);
+            try {
+                const bookedField = document.getElementById('entry_booking_booked');
+                const typeField = document.getElementById('entry_booking_appointment_type');
+                const dateTimeField = document.getElementById('entry_booking_date_time');
+                const infoField = document.getElementById('entry_booking_info');
+                
+                if (bookedField) bookedField.value = bookingData.booked;
+                if (typeField) typeField.value = bookingData.appointmentType;
+                if (dateTimeField) dateTimeField.value = bookingData.dateTime;
+                if (infoField) infoField.value = bookingData.info;
+                
+                console.log('✅ Booking data stored in form fields:', bookingData);
+                
+            } catch (error) {
+                console.error('❌ Error storing booking data:', error);
             }
             
             // Update UI
