@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Appointment Entry IDs</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            background: #2d5a27;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #1e3d1a;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+        }
+        .field-mapping {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .field-mapping h3 {
+            margin-top: 0;
+            color: #2d5a27;
+        }
+        .field-mapping ul {
+            margin: 10px 0;
+        }
+        .field-mapping li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>📋 Get Appointment Entry IDs</h1>
+    
+    <div class="field-mapping">
+        <h3>Required Fields to Add to Your Google Form:</h3>
+        <ul>
+            <li><strong>Appointment Booked:</strong> Short answer or Multiple choice (Yes/No)</li>
+            <li><strong>Appointment Type:</strong> Short answer</li>
+            <li><strong>Appointment Date:</strong> Short answer</li>
+            <li><strong>Appointment Time:</strong> Short answer</li>
+            <li><strong>Appointment Info:</strong> Paragraph (for additional details)</li>
+        </ul>
+    </div>
+
+    <div class="form-group">
+        <label for="google-form-url">Your Google Form URL:</label>
+        <input type="text" id="google-form-url" placeholder="https://docs.google.com/forms/d/YOUR_FORM_ID/viewform">
+    </div>
+
+    <button onclick="extractEntryIds()">Extract Entry IDs</button>
+
+    <div id="result" class="result" style="display: none;">
+        <h3>Entry IDs Found:</h3>
+        <div id="entry-ids"></div>
+        
+        <h3>Updated Code for contact.html:</h3>
+        <pre id="updated-code"></pre>
+    </div>
+
+    <script>
+        function extractEntryIds() {
+            const formUrl = document.getElementById('google-form-url').value;
+            
+            if (!formUrl) {
+                alert('Please enter your Google Form URL');
+                return;
+            }
+
+            // Extract form ID from URL
+            const formIdMatch = formUrl.match(/\/forms\/d\/([a-zA-Z0-9-_]+)/);
+            if (!formIdMatch) {
+                alert('Invalid Google Form URL. Please check the URL format.');
+                return;
+            }
+
+            const formId = formIdMatch[1];
+            const sourceUrl = `https://docs.google.com/forms/d/${formId}/viewform`;
+
+            // Instructions for manual extraction
+            const resultDiv = document.getElementById('result');
+            const entryIdsDiv = document.getElementById('entry-ids');
+            const updatedCodeDiv = document.getElementById('updated-code');
+
+            entryIdsDiv.innerHTML = `
+                <p><strong>To get the entry IDs:</strong></p>
+                <ol>
+                    <li>Open your Google Form: <a href="${sourceUrl}" target="_blank">${sourceUrl}</a></li>
+                    <li>Right-click on the page and select "View Page Source"</li>
+                    <li>Press Ctrl+F (or Cmd+F) and search for "entry."</li>
+                    <li>Look for the entry IDs for your appointment fields</li>
+                    <li>Replace the placeholder IDs in the code below</li>
+                </ol>
+                
+                <p><strong>Expected field names to look for:</strong></p>
+                <ul>
+                    <li>Appointment Booked</li>
+                    <li>Appointment Type</li>
+                    <li>Appointment Date</li>
+                    <li>Appointment Time</li>
+                    <li>Appointment Info</li>
+                </ul>
+            `;
+
+            updatedCodeDiv.innerHTML = `<!-- Hidden fields for Calendly booking data -->
+<input type="hidden" id="appointment-booked" name="entry.REPLACE_WITH_ACTUAL_ID" value="No">
+<input type="hidden" id="appointment-type" name="entry.REPLACE_WITH_ACTUAL_ID" value="">
+<input type="hidden" id="appointment-date" name="entry.REPLACE_WITH_ACTUAL_ID" value="">
+<input type="hidden" id="appointment-time" name="entry.REPLACE_WITH_ACTUAL_ID" value="">
+<input type="hidden" id="appointment-info" name="entry.REPLACE_WITH_ACTUAL_ID" value="">`;
+
+            resultDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html> 

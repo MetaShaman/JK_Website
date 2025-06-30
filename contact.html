@@ -232,7 +232,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="calendly-inline-widget" data-url="https://calendly.com/joonkim_schedule/land-stewardship-discovery-call" style="min-width:320px;height:700px;"></div>
+                            <div class="calendly-inline-widget" data-url="https://calendly.com/joonkim_schedule/land-stewardship-discovery-call?prefill[email]=&prefill[name]=&prefill[first_name]=&prefill[last_name]=&prefill[phone]=&prefill[location]=&prefill[note]=" style="min-width:320px;height:700px;"></div>
                             <div id="call-scheduled-status" class="call-status" style="display: none;">
                                 <div class="status-success">
                                     <i class="fas fa-check-circle"></i>
@@ -243,6 +243,15 @@
                         
                         <!-- Hidden field to track call scheduling -->
                         <input type="hidden" id="call-scheduled" name="callScheduled" value="false">
+                        
+                        <!-- Hidden fields for Calendly booking data -->
+                        <!-- TODO: Replace entry.1234567890 with actual Google Form entry IDs -->
+                        <!-- To get entry IDs: 1) Open your Google Form, 2) Right-click > View page source, 3) Search for "entry." -->
+                        <input type="hidden" id="appointment-booked" name="entry.1234567890" value="No">
+                        <input type="hidden" id="appointment-type" name="entry.1234567891" value="">
+                        <input type="hidden" id="appointment-date" name="entry.1234567892" value="">
+                        <input type="hidden" id="appointment-time" name="entry.1234567893" value="">
+                        <input type="hidden" id="appointment-info" name="entry.1234567894" value="">
                         
                         <button type="submit" class="btn btn-primary">Send Message</button>
                     </form>
@@ -324,6 +333,48 @@
             if (window.Calendly) {
                 window.Calendly('onEventScheduled', function(e) {
                     console.log('Call scheduled:', e);
+                    
+                    // Update hidden fields with booking data
+                    const appointmentBooked = document.getElementById('appointment-booked');
+                    const appointmentType = document.getElementById('appointment-type');
+                    const appointmentDate = document.getElementById('appointment-date');
+                    const appointmentTime = document.getElementById('appointment-time');
+                    const appointmentInfo = document.getElementById('appointment-info');
+                    
+                    if (appointmentBooked) appointmentBooked.value = 'Yes';
+                    if (appointmentType) appointmentType.value = 'Land Stewardship Discovery Call';
+                    
+                    // Extract date and time from the event
+                    if (e.data.payload && e.data.payload.event) {
+                        const event = e.data.payload.event;
+                        const startTime = new Date(event.start_time);
+                        
+                        if (appointmentDate) {
+                            appointmentDate.value = startTime.toLocaleDateString('en-US', {
+                                weekday: 'long',
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                            });
+                        }
+                        
+                        if (appointmentTime) {
+                            appointmentTime.value = startTime.toLocaleTimeString('en-US', {
+                                hour: 'numeric',
+                                minute: '2-digit',
+                                timeZoneName: 'short'
+                            });
+                        }
+                        
+                        if (appointmentInfo) {
+                            const info = [];
+                            if (event.name) info.push(`Event: ${event.name}`);
+                            if (event.duration) info.push(`Duration: ${event.duration} minutes`);
+                            if (event.location) info.push(`Location: ${event.location}`);
+                            appointmentInfo.value = info.join(' | ');
+                        }
+                    }
+                    
                     callScheduledField.value = 'true';
                     callScheduledStatus.style.display = 'block';
                     callScheduledStatus.scrollIntoView({ behavior: 'smooth', block: 'center' });
