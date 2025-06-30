@@ -81,7 +81,7 @@ function updateActiveNavLink() {
 
 window.addEventListener('scroll', updateActiveNavLink);
 
-// Form Handling with Formspree Backend
+// Form Handling with Google Forms Backend
 const contactForm = document.getElementById('contactForm');
 if (contactForm) {
     contactForm.addEventListener('submit', function(e) {
@@ -114,7 +114,7 @@ if (contactForm) {
         }
 
         // Basic form validation
-        const requiredFields = ['name', 'email', 'message'];
+        const requiredFields = ['entry.YOUR_NAME_ENTRY_ID', 'entry.YOUR_EMAIL_ENTRY_ID', 'entry.YOUR_MESSAGE_ENTRY_ID']; // name, email, message
         let isValid = true;
         let errorMessage = '';
 
@@ -122,7 +122,9 @@ if (contactForm) {
             const input = contactForm.querySelector(`[name="${field}"]`);
             if (!formObject[field] || formObject[field].trim() === '') {
                 isValid = false;
-                errorMessage += `${field.charAt(0).toUpperCase() + field.slice(1)} is required.\n`;
+                const fieldName = field === 'entry.YOUR_NAME_ENTRY_ID' ? 'Name' : 
+                                 field === 'entry.YOUR_EMAIL_ENTRY_ID' ? 'Email' : 'Message';
+                errorMessage += `${fieldName} is required.\n`;
                 input.style.borderColor = '#e74c3c';
             } else {
                 input.style.borderColor = '#e9ecef';
@@ -131,10 +133,10 @@ if (contactForm) {
 
         // Email validation
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (formObject.email && !emailRegex.test(formObject.email)) {
+        if (formObject['entry.YOUR_EMAIL_ENTRY_ID'] && !emailRegex.test(formObject['entry.YOUR_EMAIL_ENTRY_ID'])) {
             isValid = false;
             errorMessage += 'Please enter a valid email address.\n';
-            contactForm.querySelector('[name="email"]').style.borderColor = '#e74c3c';
+            contactForm.querySelector('[name="entry.YOUR_EMAIL_ENTRY_ID"]').style.borderColor = '#e74c3c';
         }
 
         if (!isValid) {
@@ -148,47 +150,61 @@ if (contactForm) {
         submitButton.textContent = 'Sending...';
         submitButton.disabled = true;
 
-        // Submit to Formspree
-        fetch(contactForm.action, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'Accept': 'application/json'
+        // Submit to Google Forms
+        const form = contactForm;
+        const formAction = form.action;
+        
+        // Create a temporary form to submit to Google Forms
+        const tempForm = document.createElement('form');
+        tempForm.method = 'POST';
+        tempForm.action = formAction;
+        tempForm.target = 'hidden_iframe';
+        tempForm.style.display = 'none';
+        
+        // Copy all form data to the temporary form
+        const formElements = form.elements;
+        for (let i = 0; i < formElements.length; i++) {
+            const element = formElements[i];
+            if (element.name && element.value) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = element.name;
+                input.value = element.value;
+                tempForm.appendChild(input);
             }
-        })
-        .then(response => {
-            if (response.ok) {
-                showFormSuccess();
-                contactForm.reset();
-                
-                // Track successful submission
-                if (typeof gtag !== 'undefined') {
-                    gtag('event', 'form_success', {
-                        'event_category': 'Contact',
-                        'event_label': 'Contact Form Success'
-                    });
-                }
-            } else {
-                throw new Error('Network response was not ok');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showFormError();
+        }
+        
+        // Handle checkboxes
+        const checkboxes = form.querySelectorAll('input[type="checkbox"]:checked');
+        checkboxes.forEach(checkbox => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = checkbox.name;
+            input.value = checkbox.value;
+            tempForm.appendChild(input);
+        });
+        
+        document.body.appendChild(tempForm);
+        tempForm.submit();
+        document.body.removeChild(tempForm);
+        
+        // Show success message after a short delay
+        setTimeout(() => {
+            showFormSuccess();
+            contactForm.reset();
             
-            // Track form error
+            // Track successful submission
             if (typeof gtag !== 'undefined') {
-                gtag('event', 'form_error', {
+                gtag('event', 'form_success', {
                     'event_category': 'Contact',
-                    'event_label': 'Contact Form Error'
+                    'event_label': 'Contact Form Success'
                 });
             }
-        })
-        .finally(() => {
+            
             // Reset button state
             submitButton.textContent = originalText;
             submitButton.disabled = false;
-        });
+        }, 1000);
     });
 }
 

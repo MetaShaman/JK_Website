@@ -8,7 +8,7 @@ A professional website for Joon Kim's property stewardship and project managemen
 - **Modern UI**: Clean, professional design with smooth animations and hover effects
 - **Comprehensive Content**: Detailed service descriptions, about section, and contact form
 - **Interactive Elements**: Mobile navigation, contact form validation, scroll-to-top button
-- **Form Backend Integration**: Formspree integration for reliable form handling and email notifications
+- **Form Backend Integration**: Google Forms integration for reliable form handling and email notifications
 - **Analytics Tracking**: Google Analytics 4 integration with custom event tracking
 - **Portfolio Showcase**: Featured projects section highlighting completed work
 - **SEO Optimized**: Proper meta tags, semantic HTML structure, and accessibility features
@@ -62,7 +62,7 @@ joon-kim-website/
 - **HTML5**: Semantic markup with accessibility features
 - **CSS3**: Modern styling with Flexbox and Grid layouts
 - **JavaScript**: Interactive functionality, form validation, and analytics tracking
-- **Formspree**: Form backend service for reliable email delivery
+- **Google Forms**: Form backend service for reliable email delivery and response management
 - **Google Analytics 4**: Website analytics and conversion tracking
 - **Font Awesome**: Icons for visual enhancement
 - **Google Fonts**: Inter font family for typography
@@ -72,7 +72,7 @@ joon-kim-website/
 - CSS Grid and Flexbox layouts
 - Smooth scrolling and animations
 - Form validation and user feedback
-- Formspree backend integration
+- Google Forms backend integration
 - Google Analytics event tracking
 - Portfolio showcase section
 - Accessibility enhancements (skip links, ARIA labels)
@@ -82,7 +82,7 @@ joon-kim-website/
 
 ### Prerequisites
 Before deploying, you'll need to configure:
-1. **Formspree Account**: For form backend functionality
+1. **Google Forms**: For form backend functionality
 2. **Google Analytics Account**: For website analytics
 
 See `SETUP_GUIDE.md` for detailed configuration instructions.
@@ -103,17 +103,17 @@ See `SETUP_GUIDE.md` for detailed configuration instructions.
 4. Your site will be available at `https://yourusername.github.io/repository-name`
 
 ### Backend Configuration
-1. **Formspree Setup**: Follow the setup guide to configure form handling
+1. **Google Forms Setup**: Follow the setup guide to configure form handling
 2. **Analytics Setup**: Configure Google Analytics tracking
 3. **Testing**: Verify form submissions and analytics tracking
 
 ## New Features
 
 ### Form Backend Integration
-- **Formspree Integration**: Reliable form submission handling
+- **Google Forms Integration**: Reliable form submission handling
 - **Email Notifications**: Automatic email alerts for form submissions
-- **Spam Protection**: Built-in spam filtering
-- **Form Analytics**: Submission statistics and insights
+- **Response Management**: View and export submissions in Google Forms dashboard
+- **Spam Protection**: Built-in spam protection and response limiting
 
 ### Analytics Tracking
 - **Page Views**: Track visitor behavior across all pages
@@ -136,9 +136,9 @@ Update the following in all HTML files:
 - Location: Update service areas as needed
 
 #### Backend Configuration
-- **Formspree**: Update form ID in `contact.html`
+- **Google Forms**: Update form ID and entry IDs in `contact.html`
 - **Analytics**: Update Measurement ID in all HTML files
-- **Email Settings**: Configure notification preferences in Formspree
+- **Email Settings**: Configure notification preferences in Google Forms
 
 #### Content Updates
 - **Services**: Modify service descriptions in `services.html`
@@ -199,5 +199,4 @@ For technical issues or customization help:
 
 ---
 
-**Note**: Remember to configure Formspree and Google Analytics before deploying to production. See `SETUP_GUIDE.md` for detailed instructions.
-
+**Note**: Remember to configure Google Forms and Google Analytics before deploying to production. See `SETUP_GUIDE.md` for detailed instructions.
