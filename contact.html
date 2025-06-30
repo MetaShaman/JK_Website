@@ -193,14 +193,28 @@
                             </select>
                         </div>
                         
-                        <!-- Consultation Scheduling Section -->
+                        <!-- Consultation Preference Section -->
                         <div class="form-group">
-                            <label class="checkbox-label">
-                                <input type="checkbox" id="schedule-consultation" name="scheduleConsultation">
-                                <span class="checkmark"></span>
-                                I'd like to schedule a discovery call (recommended for new clients)
-                            </label>
-                            <small class="form-help-text">💡 Tip: Fill out the form above first, then schedule your call below for the best experience.</small>
+                            <label class="form-label-required">Consultation Preference *</label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="consultationPreference" value="schedule-call" id="schedule-call" required>
+                                    <span class="radio-custom"></span>
+                                    <div class="radio-content">
+                                        <span class="radio-title">📅 Schedule a Discovery Call</span>
+                                        <span class="radio-description">I'd like to schedule a 30-minute complimentary discovery call to discuss my land stewardship needs (recommended for new clients)</span>
+                                    </div>
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="consultationPreference" value="not-ready" id="not-ready" required>
+                                    <span class="radio-custom"></span>
+                                    <div class="radio-content">
+                                        <span class="radio-title">📧 Email Communication Only</span>
+                                        <span class="radio-description">I'm not ready for a call yet, but would like to receive information via email</span>
+                                    </div>
+                                </label>
+                            </div>
+                            <small class="form-help-text">💡 Discovery calls help us better understand your specific needs and provide tailored recommendations.</small>
                         </div>
                         
                         <!-- Calendly Widget Container (hidden by default) -->
@@ -269,30 +283,38 @@
     <!-- Calendly Integration -->
     <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
     <script>
-        // Toggle Calendly widget when checkbox is checked
+        // Toggle Calendly widget when radio button is selected
         document.addEventListener('DOMContentLoaded', function() {
-            const scheduleCheckbox = document.getElementById('schedule-consultation');
+            const scheduleCallRadio = document.getElementById('schedule-call');
+            const notReadyRadio = document.getElementById('not-ready');
             const calendlyContainer = document.getElementById('calendly-container');
             const contactForm = document.getElementById('contact-form');
             
-            if (scheduleCheckbox && calendlyContainer) {
-                scheduleCheckbox.addEventListener('change', function() {
-                    if (this.checked) {
-                        calendlyContainer.style.display = 'block';
-                        // Smooth scroll to the Calendly widget
-                        calendlyContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    } else {
-                        calendlyContainer.style.display = 'none';
-                    }
-                });
+            // Function to handle radio button changes
+            function handleConsultationPreference() {
+                if (scheduleCallRadio && scheduleCallRadio.checked) {
+                    calendlyContainer.style.display = 'block';
+                    // Smooth scroll to the Calendly widget
+                    calendlyContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } else {
+                    calendlyContainer.style.display = 'none';
+                }
+            }
+            
+            // Add event listeners for radio buttons
+            if (scheduleCallRadio) {
+                scheduleCallRadio.addEventListener('change', handleConsultationPreference);
+            }
+            if (notReadyRadio) {
+                notReadyRadio.addEventListener('change', handleConsultationPreference);
             }
             
             // Form submission enhancement
             if (contactForm) {
                 contactForm.addEventListener('submit', function(e) {
-                    const isSchedulingChecked = scheduleCheckbox && scheduleCheckbox.checked;
+                    const isSchedulingSelected = scheduleCallRadio && scheduleCallRadio.checked;
                     
-                    if (isSchedulingChecked) {
+                    if (isSchedulingSelected) {
                         // Show a friendly reminder to complete both actions
                         const reminder = confirm('Great! You\'ve chosen to schedule a discovery call. Please make sure you\'ve:\n\n1. ✅ Filled out the form above\n2. 📅 Scheduled your discovery call\n3. 📤 Submitted this form\n\nClick OK to continue with form submission, or Cancel to review your information.');
                         

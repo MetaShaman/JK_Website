@@ -1480,3 +1480,109 @@ a:focus {
     font-size: 14px;
 }
 
+/* Required field label styling */
+.form-label-required {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: #2d5a27;
+    font-size: 1rem;
+}
+
+.form-label-required::after {
+    content: " *";
+    color: #dc3545;
+}
+
+/* Radio button group styling */
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.radio-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    padding: 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.radio-label:hover {
+    border-color: #2d5a27;
+    background-color: #f8f9fa;
+}
+
+.radio-label input[type="radio"] {
+    display: none;
+}
+
+.radio-custom {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #2d5a27;
+    border-radius: 50%;
+    display: inline-block;
+    position: relative;
+    background: white;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.radio-label input[type="radio"]:checked + .radio-custom::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 10px;
+    background: #2d5a27;
+    border-radius: 50%;
+}
+
+.radio-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.radio-title {
+    font-weight: 600;
+    color: #2d5a27;
+    font-size: 1rem;
+}
+
+.radio-description {
+    color: #6c757d;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+/* Selected state styling */
+.radio-label input[type="radio"]:checked ~ .radio-content .radio-title {
+    color: #2d5a27;
+}
+
+.radio-label input[type="radio"]:checked ~ .radio-content {
+    border-color: #2d5a27;
+    background-color: #e8f5e8;
+}
+
+.radio-label input[type="radio"]:checked {
+    border-color: #2d5a27;
+    background-color: #e8f5e8;
+}
+
+/* Fix: Style the parent label when radio is checked */
+.radio-label:has(input[type="radio"]:checked) {
+    border-color: #2d5a27;
+    background-color: #e8f5e8;
+}
+
