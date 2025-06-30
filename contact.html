@@ -357,6 +357,36 @@
         // Start Calendly integration
         setupCalendlyIntegration();
         
+        // Handle consultation preference radio buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            const discoveryCallRadio = document.querySelector('input[value="discovery_call"]');
+            const emailOnlyRadio = document.querySelector('input[value="email_only"]');
+            const calendlyContainer = document.getElementById('calendly-container');
+            
+            // Function to handle radio button changes
+            function handleConsultationPreference() {
+                if (discoveryCallRadio.checked) {
+                    console.log('📅 Discovery call selected - showing Calendly widget');
+                    calendlyContainer.style.display = 'block';
+                    calendlyContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                } else if (emailOnlyRadio.checked) {
+                    console.log('📧 Email only selected - hiding Calendly widget');
+                    calendlyContainer.style.display = 'none';
+                }
+            }
+            
+            // Add event listeners to radio buttons
+            if (discoveryCallRadio) {
+                discoveryCallRadio.addEventListener('change', handleConsultationPreference);
+            }
+            if (emailOnlyRadio) {
+                emailOnlyRadio.addEventListener('change', handleConsultationPreference);
+            }
+            
+            // Check initial state
+            handleConsultationPreference();
+        });
+        
         // Test function for Calendly listener
         function testCalendlyListener() {
             console.log('🧪 Testing Calendly listener...');
