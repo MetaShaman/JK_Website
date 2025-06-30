@@ -250,6 +250,7 @@
                         <!-- Debug button for testing -->
                         <button type="button" class="btn btn-secondary" style="margin-left: 10px; font-size: 12px;" onclick="simulateCallScheduled()">Test: Simulate Call Scheduled</button>
                         <button type="button" class="btn btn-secondary" style="margin-left: 10px; font-size: 12px;" onclick="testCalendlyListener()">Test: Check Calendly</button>
+                        <button type="button" class="btn btn-secondary" style="margin-left: 10px; font-size: 12px;" onclick="manualBookingComplete()">Manual: Set Booking State</button>
                     </form>
                 </div>
             </div>
@@ -325,6 +326,7 @@
                 if (window.Calendly && typeof window.Calendly === 'function') {
                     // Wait a bit more for the widget to be fully initialized
                     setTimeout(function() {
+                        // Set up the main event listener
                         window.Calendly('onEventScheduled', function(e) {
                             console.log('🎉 Calendly event scheduled:', e);
                             
@@ -383,6 +385,25 @@
                             callScheduledStatus.scrollIntoView({ behavior: 'smooth', block: 'center' });
                             console.log('✅ Call scheduled field set to true');
                         });
+                        
+                        // Set up additional event listeners for debugging
+                        window.Calendly('onProfilePageViewed', function(e) {
+                            console.log('📊 Calendly profile page viewed:', e);
+                        });
+                        
+                        window.Calendly('onDateAndTimeSelected', function(e) {
+                            console.log('📅 Calendly date/time selected:', e);
+                        });
+                        
+                        window.Calendly('onEventTypeViewed', function(e) {
+                            console.log('👀 Calendly event type viewed:', e);
+                        });
+                        
+                        // Listen for any Calendly events
+                        if (window.Calendly.EVENT_TYPES) {
+                            console.log('📋 Available Calendly event types:', window.Calendly.EVENT_TYPES);
+                        }
+                        
                         console.log('✅ Calendly event listener set up successfully');
                     }, 2000); // Wait 2 seconds for widget to be fully loaded
                 } else {
@@ -447,6 +468,19 @@
                     console.log('  - Exists:', !!window.Calendly);
                     console.log('  - Type:', typeof window.Calendly);
                 }
+            };
+            
+            // Function to manually set booking state after Calendly booking
+            window.manualBookingComplete = function() {
+                console.log('🔧 Manually setting booking state...');
+                callScheduledField.value = 'true';
+                document.getElementById('appointment-booked').value = 'Yes';
+                document.getElementById('appointment-type').value = 'Land Stewardship Discovery Call';
+                document.getElementById('appointment-date').value = 'Booked via Calendly';
+                document.getElementById('appointment-time').value = 'Booked via Calendly';
+                document.getElementById('appointment-info').value = 'Event: Land Stewardship Discovery Call | Duration: 15 minutes | Location: Video Call';
+                callScheduledStatus.style.display = 'block';
+                console.log('✅ Manual booking state set!');
             };
             
             // Form submission validation
