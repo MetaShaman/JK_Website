@@ -45,6 +45,7 @@
             <button onclick="testEmailOnly()">📧 Test Email-Only</button>
             <button onclick="testCallScheduling()">📅 Test Call Scheduling</button>
             <button onclick="simulateCallScheduled()">🎯 Simulate Call Scheduled</button>
+            <button onclick="testDirectSubmission()">🚀 Test Direct Submission</button>
         </div>
 
         <!-- Copy the entire contact form from contact.html here -->
@@ -205,7 +206,7 @@
                 
                 <button type="submit" class="btn btn-primary">Send Message</button>
             </form>
-            <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
+            <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;" onload="console.log('📨 Form submitted to Google Forms!')"></iframe>
         </div>
     </div>
 
@@ -303,6 +304,30 @@
             console.log('🎯 Simulated call scheduled - all fields populated');
         }
 
+        function testDirectSubmission() {
+            populateDemoData();
+            document.getElementById('not-ready').checked = true;
+            
+            // Temporarily remove the submit event listener
+            const form = document.getElementById('contactForm');
+            const originalSubmit = form.onsubmit;
+            form.onsubmit = null;
+            
+            console.log('🚀 Testing direct form submission to Google Forms...');
+            console.log('📊 Form action:', form.action);
+            console.log('📊 Form method:', form.method);
+            console.log('📊 Form target:', form.target);
+            
+            // Submit the form directly
+            form.submit();
+            
+            // Restore the original submit handler after a delay
+            setTimeout(() => {
+                form.onsubmit = originalSubmit;
+                console.log('✅ Submit handler restored');
+            }, 3000);
+        }
+
         // Auto-populate on page load
         document.addEventListener('DOMContentLoaded', function() {
             populateDemoData();
@@ -380,9 +405,14 @@
                     }
                     
                     console.log('🚀 Form submission proceeding to Google Forms...');
+                    
+                    // Let the form submit normally to Google Forms
+                    // The iframe will handle the submission
+                    // Don't prevent default - let the form submit!
+                    
                     setTimeout(function() {
                         showSubmissionSuccess();
-                    }, 1000);
+                    }, 2000); // Give more time for the form to submit
                 });
             }
             
