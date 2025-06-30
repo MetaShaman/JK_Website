@@ -397,10 +397,12 @@
                 // Check for Calendly events in various formats
                 if (e.data && e.data.event) {
                     console.log('📨 Event detected:', e.data.event);
+                    console.log('📨 Full event data:', JSON.stringify(e.data, null, 2));
                     
                     if (e.data.event === 'calendly:event_scheduled' || e.data.event === 'calendly.event_scheduled') {
                         console.log('🎉 Calendly event scheduled (Method 2):', e.data);
-                        handleCallScheduled(e.data.payload || e.data);
+                        console.log('🎉 Event payload:', JSON.stringify(e.data.payload, null, 2));
+                        handleCallScheduled(e.data);
                     }
                 }
                 
@@ -408,7 +410,7 @@
                 if (e.data && e.data.event && e.data.event.indexOf('calendly') !== -1) {
                     console.log('📨 Calendly message received (Method 2):', e.data);
                     if (e.data.event === 'calendly:event_scheduled' || e.data.event === 'calendly.event_scheduled') {
-                        handleCallScheduled(e.data.payload || e.data);
+                        handleCallScheduled(e.data);
                     }
                 }
             });
@@ -459,6 +461,7 @@
         // Handle call scheduled event
         function handleCallScheduled(details) {
             console.log('🎉 Call scheduled with details:', details);
+            console.log('🎉 Full details object:', JSON.stringify(details, null, 2));
             callScheduled = true;
             
             // Extract booking information from Calendly event data
@@ -482,9 +485,14 @@
             } else if (details && details.event && details.payload) {
                 payload = details.payload;
                 console.log('📅 Extracting booking details from event payload:', payload);
+            } else {
+                console.log('📅 No payload found in details, using full details object');
+                payload = details;
             }
             
             if (payload) {
+                console.log('📅 Processing payload:', JSON.stringify(payload, null, 2));
+                
                 // If we have event URI, we can extract the event ID
                 if (payload.event && payload.event.uri) {
                     const eventUri = payload.event.uri;
