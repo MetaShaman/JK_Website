@@ -470,23 +470,56 @@
             };
             
             // Try to extract more detailed information from the event data
+            // Handle different data structures from various Calendly event sources
+            let payload = null;
+            
             if (details && details.payload) {
-                console.log('📅 Extracting booking details from payload:', details.payload);
-                
+                payload = details.payload;
+                console.log('📅 Extracting booking details from details.payload:', payload);
+            } else if (details && details.data && details.data.payload) {
+                payload = details.data.payload;
+                console.log('📅 Extracting booking details from details.data.payload:', payload);
+            } else if (details && details.event && details.payload) {
+                payload = details.payload;
+                console.log('📅 Extracting booking details from event payload:', payload);
+            }
+            
+            if (payload) {
                 // If we have event URI, we can extract the event ID
-                if (details.payload.event && details.payload.event.uri) {
-                    const eventUri = details.payload.event.uri;
+                if (payload.event && payload.event.uri) {
+                    const eventUri = payload.event.uri;
                     const eventId = eventUri.split('/').pop();
                     bookingData.info = `Event ID: ${eventId} | Booked via Calendly`;
                     console.log('🎫 Event ID extracted:', eventId);
                 }
                 
                 // If we have invitee URI, we can extract the invitee ID
-                if (details.payload.invitee && details.payload.invitee.uri) {
-                    const inviteeUri = details.payload.invitee.uri;
+                if (payload.invitee && payload.invitee.uri) {
+                    const inviteeUri = payload.invitee.uri;
                     const inviteeId = inviteeUri.split('/').pop();
                     bookingData.info += ` | Invitee ID: ${inviteeId}`;
                     console.log('👤 Invitee ID extracted:', inviteeId);
+                }
+                
+                // Try to extract date/time information if available
+                if (payload.event && payload.event.start_time) {
+                    const startTime = new Date(payload.event.start_time);
+                    bookingData.dateTime = startTime.toLocaleString('en-US', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        timeZoneName: 'short'
+                    });
+                    console.log('📅 Date/Time extracted:', bookingData.dateTime);
+                }
+                
+                // Try to extract event name if available
+                if (payload.event && payload.event.name) {
+                    bookingData.appointmentType = payload.event.name;
+                    console.log('📋 Event name extracted:', bookingData.appointmentType);
                 }
             }
             
