@@ -98,7 +98,7 @@
                 <!-- Contact Form -->
                 <div class="contact-form">
                     <h2>Send Me a Message</h2>
-                    <form id="contactForm" action="https://docs.google.com/forms/d/e/1FAIpQLSf76wgQZ6fUxB7f2Zt1Ppjw1hlQcoKqmk4Yn0O2R5Qmy9UHJA/formResponse" method="POST" target="hidden_iframe">
+                    <form id="contactForm" action="https://docs.google.com/forms/d/e/1FAIpQLSf76wgQZ6fUxB7f2Zt1Ppjw1hlQcoKqmk4Yn0O2R5Qmy9UHJA/formResponse" method="POST" target="_blank">
                         <div class="form-group">
                             <label for="email">Email *</label>
                             <input type="email" id="email" name="emailAddress" required>
@@ -253,7 +253,6 @@
                         
                         <button type="submit" class="btn btn-primary">Send Message</button>
                     </form>
-                    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
                 </div>
             </div>
         </div>
@@ -405,10 +404,14 @@
                         return false;
                     }
                     
-                    // Allow form to submit to iframe, then show success message
+                    console.log('🚀 Form submission proceeding to Google Forms...');
+                    
+                    // Let the form submit normally to Google Forms in a new tab
+                    // The form will open in a new tab where the user can complete submission
+                    
                     setTimeout(function() {
                         showSubmissionSuccess();
-                    }, 1000);
+                    }, 2000); // Give time for the new tab to open
                 });
             }
             
