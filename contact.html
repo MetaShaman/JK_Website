@@ -251,6 +251,9 @@
                         <button type="button" class="btn btn-secondary" style="margin-left: 10px; font-size: 12px;" onclick="simulateCallScheduled()">Test: Simulate Call Scheduled</button>
                         <button type="button" class="btn btn-secondary" style="margin-left: 10px; font-size: 12px;" onclick="testCalendlyListener()">Test: Check Calendly</button>
                         <button type="button" class="btn btn-secondary" style="margin-left: 10px; font-size: 12px;" onclick="manualBookingComplete()">Manual: Set Booking State</button>
+
+                        <!-- Manual trigger button for testing
+                        <button type="button" class="btn btn-warning btn-sm" onclick="markCallAsScheduled({ source: 'manual test' })">🔧 Test: Simulate Call Booking</button> -->
                     </form>
                 </div>
             </div>
@@ -329,6 +332,89 @@
                 radio.addEventListener('change', handleConsultationPreference);
             });
             
+            // Function to mark call as scheduled and update form fields
+            function markCallAsScheduled(eventData) {
+                console.log('🎯 Marking call as scheduled with data:', eventData);
+                
+                // Update hidden fields with booking data
+                const appointmentBooked = document.getElementById('appointment-booked');
+                const appointmentType = document.getElementById('appointment-type');
+                const appointmentDate = document.getElementById('appointment-date');
+                const appointmentTime = document.getElementById('appointment-time');
+                const appointmentInfo = document.getElementById('appointment-info');
+                
+                if (appointmentBooked) {
+                    appointmentBooked.value = 'Yes';
+                    console.log('✅ Appointment booked set to Yes');
+                }
+                if (appointmentType) {
+                    appointmentType.value = 'Land Stewardship Discovery Call';
+                    console.log('✅ Appointment type set');
+                }
+                
+                // Extract date and time from the event if available
+                if (eventData && eventData.data && eventData.data.payload && eventData.data.payload.event) {
+                    const event = eventData.data.payload.event;
+                    const startTime = new Date(event.start_time);
+                    
+                    if (appointmentDate) {
+                        appointmentDate.value = startTime.toLocaleDateString('en-US', {
+                            weekday: 'long',
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                        });
+                        console.log('✅ Appointment date set:', appointmentDate.value);
+                    }
+                    
+                    if (appointmentTime) {
+                        appointmentTime.value = startTime.toLocaleTimeString('en-US', {
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            timeZoneName: 'short'
+                        });
+                        console.log('✅ Appointment time set:', appointmentTime.value);
+                    }
+                    
+                    if (appointmentInfo) {
+                        const info = [];
+                        if (event.name) info.push(`Event: ${event.name}`);
+                        if (event.duration) info.push(`Duration: ${event.duration} minutes`);
+                        if (event.location) info.push(`Location: ${event.location}`);
+                        appointmentInfo.value = info.join(' | ');
+                        console.log('✅ Appointment info set:', appointmentInfo.value);
+                    }
+                } else {
+                    // Set default values if no event data
+                    if (appointmentDate) appointmentDate.value = 'Scheduled via Calendly';
+                    if (appointmentTime) appointmentTime.value = 'Scheduled via Calendly';
+                    if (appointmentInfo) appointmentInfo.value = 'Land Stewardship Discovery Call - Scheduled via Calendly';
+                }
+                
+                callScheduledField.value = 'true';
+                callScheduledStatus.style.display = 'block';
+                callScheduledStatus.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                console.log('✅ Call scheduled field set to true');
+                
+                // Show success message
+                const successMessage = document.createElement('div');
+                successMessage.className = 'alert alert-success';
+                successMessage.innerHTML = '<strong>✅ Call Scheduled!</strong> Your discovery call has been booked. You can now submit the form.';
+                callScheduledStatus.appendChild(successMessage);
+                
+                // Manual trigger button for testing
+                const manualTriggerBtn = document.createElement('button');
+                manualTriggerBtn.type = 'button';
+                manualTriggerBtn.className = 'btn btn-warning btn-sm';
+                manualTriggerBtn.style.marginTop = '10px';
+                manualTriggerBtn.textContent = '🔧 Test: Simulate Call Booking';
+                manualTriggerBtn.onclick = function() {
+                    console.log('🧪 Manual trigger: Simulating call booking...');
+                    markCallAsScheduled({ source: 'manual test' });
+                };
+                callScheduledStatus.appendChild(manualTriggerBtn);
+            }
+            
             // Function to set up Calendly event listener
             function setupCalendlyListener() {
                 console.log('🔧 Setting up Calendly listener...');
@@ -344,61 +430,7 @@
                             // Set up the main event listener
                             window.Calendly('onEventScheduled', function(e) {
                                 console.log('🎉 Calendly event scheduled:', e);
-                                
-                                // Update hidden fields with booking data
-                                const appointmentBooked = document.getElementById('appointment-booked');
-                                const appointmentType = document.getElementById('appointment-type');
-                                const appointmentDate = document.getElementById('appointment-date');
-                                const appointmentTime = document.getElementById('appointment-time');
-                                const appointmentInfo = document.getElementById('appointment-info');
-                                
-                                if (appointmentBooked) {
-                                    appointmentBooked.value = 'Yes';
-                                    console.log('✅ Appointment booked set to Yes');
-                                }
-                                if (appointmentType) {
-                                    appointmentType.value = 'Land Stewardship Discovery Call';
-                                    console.log('✅ Appointment type set');
-                                }
-                                
-                                // Extract date and time from the event
-                                if (e.data.payload && e.data.payload.event) {
-                                    const event = e.data.payload.event;
-                                    const startTime = new Date(event.start_time);
-                                    
-                                    if (appointmentDate) {
-                                        appointmentDate.value = startTime.toLocaleDateString('en-US', {
-                                            weekday: 'long',
-                                            year: 'numeric',
-                                            month: 'long',
-                                            day: 'numeric'
-                                        });
-                                        console.log('✅ Appointment date set:', appointmentDate.value);
-                                    }
-                                    
-                                    if (appointmentTime) {
-                                        appointmentTime.value = startTime.toLocaleTimeString('en-US', {
-                                            hour: 'numeric',
-                                            minute: '2-digit',
-                                            timeZoneName: 'short'
-                                        });
-                                        console.log('✅ Appointment time set:', appointmentTime.value);
-                                    }
-                                    
-                                    if (appointmentInfo) {
-                                        const info = [];
-                                        if (event.name) info.push(`Event: ${event.name}`);
-                                        if (event.duration) info.push(`Duration: ${event.duration} minutes`);
-                                        if (event.location) info.push(`Location: ${event.location}`);
-                                        appointmentInfo.value = info.join(' | ');
-                                        console.log('✅ Appointment info set:', appointmentInfo.value);
-                                    }
-                                }
-                                
-                                callScheduledField.value = 'true';
-                                callScheduledStatus.style.display = 'block';
-                                callScheduledStatus.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                console.log('✅ Call scheduled field set to true');
+                                markCallAsScheduled(e);
                             });
                             
                             // Set up additional event listeners for debugging
@@ -408,6 +440,8 @@
                             
                             window.Calendly('onDateAndTimeSelected', function(e) {
                                 console.log('📅 Calendly date/time selected:', e);
+                                // This might be the key event we need
+                                markCallAsScheduled(e);
                             });
                             
                             window.Calendly('onEventTypeViewed', function(e) {
@@ -418,6 +452,54 @@
                             if (window.Calendly.EVENT_TYPES) {
                                 console.log('📋 Available Calendly event types:', window.Calendly.EVENT_TYPES);
                             }
+                            
+                            // Set up DOM mutation observer to detect booking completion
+                            const calendlyContainer = document.querySelector('.calendly-inline-widget');
+                            if (calendlyContainer) {
+                                const observer = new MutationObserver(function(mutations) {
+                                    mutations.forEach(function(mutation) {
+                                        if (mutation.type === 'childList') {
+                                            mutation.addedNodes.forEach(function(node) {
+                                                if (node.nodeType === 1) { // Element node
+                                                    // Look for success messages or confirmation elements
+                                                    if (node.textContent && (
+                                                        node.textContent.includes('confirmed') ||
+                                                        node.textContent.includes('scheduled') ||
+                                                        node.textContent.includes('booked') ||
+                                                        node.textContent.includes('appointment') ||
+                                                        node.textContent.includes('success')
+                                                    )) {
+                                                        console.log('🎯 Detected booking confirmation in DOM:', node.textContent);
+                                                        markCallAsScheduled({ source: 'DOM mutation' });
+                                                    }
+                                                }
+                                            });
+                                        }
+                                    });
+                                });
+                                
+                                observer.observe(calendlyContainer, {
+                                    childList: true,
+                                    subtree: true,
+                                    characterData: true
+                                });
+                                console.log('👁️ DOM mutation observer set up for Calendly container');
+                            }
+                            
+                            // Listen for iframe messages from Calendly
+                            window.addEventListener('message', function(event) {
+                                if (event.origin.includes('calendly.com')) {
+                                    console.log('📨 Received message from Calendly:', event.data);
+                                    if (event.data && (
+                                        event.data.type === 'calendly:event_scheduled' ||
+                                        event.data.type === 'calendly:date_and_time_selected' ||
+                                        event.data.type === 'calendly:booking_confirmed'
+                                    )) {
+                                        console.log('🎯 Detected Calendly booking event via message:', event.data);
+                                        markCallAsScheduled(event.data);
+                                    }
+                                }
+                            });
                             
                             console.log('✅ Calendly event listener set up successfully');
                         } catch (error) {
