@@ -201,8 +201,8 @@
                                     <input type="radio" name="consultationPreference" value="schedule-call" id="schedule-call" required>
                                     <span class="radio-custom"></span>
                                     <div class="radio-content">
-                                        <span class="radio-title">📅 Schedule a Discovery Call</span>
-                                        <span class="radio-description">I'd like to schedule a 30-minute complimentary discovery call to discuss my land stewardship needs (recommended for new clients)</span>
+                                        <span class="radio-title">📅 Schedule a 15-Minute Discovery Call</span>
+                                        <span class="radio-description">I'd like to schedule a 15-minute complimentary discovery call to discuss my land stewardship needs (recommended for new clients)</span>
                                     </div>
                                 </label>
                                 <label class="radio-label">
@@ -210,7 +210,7 @@
                                     <span class="radio-custom"></span>
                                     <div class="radio-content">
                                         <span class="radio-title">📧 Email Communication Only</span>
-                                        <span class="radio-description">I'm not ready for a call yet, but would like to receive information via email</span>
+                                        <span class="radio-description">I'm not ready to schedule a call today, but would like to receive information via email</span>
                                     </div>
                                 </label>
                             </div>
@@ -220,8 +220,8 @@
                         <!-- Calendly Widget Container (hidden by default) -->
                         <div id="calendly-container" class="calendly-container" style="display: none;">
                             <div class="calendly-header">
-                                <h3>📅 Schedule Your Discovery Call</h3>
-                                <p>Choose a time that works best for you. This will be a 30-minute complimentary discovery call to discuss your land stewardship needs and goals.</p>
+                                <h3>📅 Schedule Your 15-Minute Discovery Call</h3>
+                                <p>Choose a time that works best for you. This will be a 15-minute complimentary discovery call to discuss your land stewardship needs and goals.</p>
                                 <div class="calendly-instructions">
                                     <div class="instruction-step">
                                         <span class="step-number">1</span>
@@ -316,7 +316,7 @@
                     
                     if (isSchedulingSelected) {
                         // Show a friendly reminder to complete both actions
-                        const reminder = confirm('Great! You\'ve chosen to schedule a discovery call. Please make sure you\'ve:\n\n1. ✅ Filled out the form above\n2. 📅 Scheduled your discovery call\n3. 📤 Submitted this form\n\nClick OK to continue with form submission, or Cancel to review your information.');
+                        const reminder = confirm('Great! You\'ve chosen to schedule a 15-minute discovery call. Please make sure you\'ve:\n\n1. ✅ Filled out the form above\n2. 📅 Scheduled your discovery call\n3. 📤 Submitted this form\n\nClick OK to continue with form submission, or Cancel to review your information.');
                         
                         if (!reminder) {
                             e.preventDefault();
